@@ -29,6 +29,18 @@ Managiha is a digital replacement for that notebook — not an accounting suite,
 
 ---
 
+## Live demo
+
+Try it without setting anything up:
+
+- **App:** <https://managiha.vercel.app> *(coming online with the first deploy)*
+- **Demo account:** `demo@managiha.app` / `Managiha2026`
+- The demo store is seeded — 12 products (some low/out of stock, for the alerts to shine), movement history, 3 carnet customers with existing balances, suppliers.
+
+> Sandbox by design: the credentials are public so anyone can explore. The password is documented here on purpose and the demo data can be wiped anytime (run `supabase/tests/rls_rpc_tests.sql`-style cleanup or just create your own account — signup is open).
+
+---
+
 ## Features
 
 - **Dashboard** — 4 KPIs (stock value, low stock, out of stock, carnet balance), low-stock list with a one-click "Réceptionner", recent activity feeds, and always-visible quick actions (add product / new carnet entry).
