@@ -33,7 +33,7 @@ Managiha is a digital replacement for that notebook — not an accounting suite,
 
 Try it without setting anything up:
 
-- **App:** <https://managiha.vercel.app> *(coming online with the first deploy)*
+- **App:** <https://managiha.vercel.app/>
 - **Demo account:** `demo@managiha.app` / `Managiha2026`
 - The demo store is seeded — 12 products (some low/out of stock, for the alerts to shine), movement history, 3 carnet customers with existing balances, suppliers.
 
