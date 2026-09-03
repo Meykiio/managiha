@@ -85,7 +85,7 @@ export default function SignupPage() {
           label={t("auth.signup.storeName")}
           required
           autoComplete="organization"
-          placeholder="Ex : Épicerie El Baraka"
+          placeholder={t("auth.signup.storeNamePlaceholder")}
           value={storeName}
           onChange={(e) => setStoreName(e.target.value)}
         />

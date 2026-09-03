@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { t } from "../../i18n";
 
 interface ModalProps {
   open: boolean;
@@ -56,7 +57,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
             <button
               type="button"
               onClick={onClose}
-              aria-label="Fermer"
+              aria-label={t("common.close")}
               className="-me-2 flex h-11 w-11 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
             >
               <X className="h-5 w-5" />

@@ -9,6 +9,10 @@
   body {
     @apply bg-neutral-50 text-neutral-900 antialiased;
   }
+  /* Inter has no Arabic glyphs, so Arabic gets a matching UI face. */
+  html[lang="ar"] body {
+    font-family: "Noto Sans Arabic", "Inter", system-ui, sans-serif;
+  }
   ::selection {
     @apply bg-primary-100 text-primary-900;
   }

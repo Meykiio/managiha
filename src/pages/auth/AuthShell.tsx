@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "../../components/layout/Logo";
+import { LanguageSwitcher } from "../../components/layout/LanguageSwitcher";
 
 interface AuthShellProps {
   children: ReactNode;
@@ -17,6 +18,10 @@ export function AuthShell({ children, footer }: AuthShellProps) {
         {children}
       </div>
       {footer && <div className="mt-5 text-center text-sm text-neutral-500">{footer}</div>}
+      {/* Visible before sign-in so the language is never a locked-in guess. */}
+      <div className="mt-6">
+        <LanguageSwitcher variant="inline" />
+      </div>
     </div>
   );
 }

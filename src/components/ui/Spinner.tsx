@@ -1,4 +1,5 @@
 import { cn } from "../../lib/utils";
+import { t } from "../../i18n";
 
 export function Spinner({ className }: { className?: string }) {
   return (
@@ -6,7 +7,7 @@ export function Spinner({ className }: { className?: string }) {
       className={cn("h-5 w-5 animate-spin text-primary-600", className)}
       viewBox="0 0 24 24"
       fill="none"
-      aria-label="Chargement"
+      aria-label={t("common.loading")}
     >
       <circle
         className="opacity-25"

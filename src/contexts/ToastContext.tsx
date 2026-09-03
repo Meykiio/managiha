@@ -8,6 +8,7 @@ import {
 } from "react";
 import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import { cn } from "../lib/utils";
+import { t } from "../i18n";
 
 type ToastType = "success" | "error";
 
@@ -74,7 +75,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => dismiss(toast.id)}
               className="-me-1 -mt-1 flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
-              aria-label="Fermer"
+              aria-label={t("common.close")}
             >
               <X className="h-4 w-4" />
             </button>

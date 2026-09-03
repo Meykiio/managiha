@@ -8,6 +8,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
+import { isLanguage, setLanguage, t } from "../i18n";
 import type { Profile, Store } from "../lib/types";
 
 interface SignUpInput {
@@ -41,18 +42,27 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
+/**
+ * Same context, but tolerates the provider being absent. For UI that can render
+ * outside the authenticated tree — the language switcher on auth screens,
+ * isolated component tests — and only needs the store when one exists.
+ */
+export function useOptionalAuth(): AuthContextValue | null {
+  return useContext(AuthContext);
+}
+
 function mapAuthError(message: string | undefined): string {
   switch (message) {
     case "Invalid login credentials":
-      return "Email ou mot de passe incorrect.";
+      return t("authError.invalidCredentials");
     case "User already registered":
-      return "Un compte existe déjà avec cet email.";
+      return t("authError.alreadyRegistered");
     case "Password should be at least 6 characters":
-      return "Le mot de passe doit contenir au moins 6 caractères.";
+      return t("authError.weakPassword");
     case "Email not confirmed":
-      return "Veuillez d'abord confirmer votre adresse email.";
+      return t("authError.emailNotConfirmed");
     default:
-      return message || "Une erreur est survenue.";
+      return message || t("authError.generic");
   }
 }
 
@@ -102,6 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStore(storeRes.data ?? null);
       setStoreMissing(!storeRes.data && !error);
       setUserDataReady(true);
+
+      // The store row is the account-level preference, so it wins on login and
+      // follows the owner onto any device.
+      const storeLanguage = storeRes.data?.language;
+      if (isLanguage(storeLanguage)) setLanguage(storeLanguage);
     },
     [userId]
   );

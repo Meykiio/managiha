@@ -8,12 +8,12 @@ import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { Select } from "../../components/ui/Select";
 import { PageHeader } from "../../components/ui/PageHeader";
-import { t } from "../../i18n";
-import { setLanguage } from "../../i18n";
+import { LANGUAGES, setLanguage, t, useLanguage } from "../../i18n";
 
 export default function SettingsPage() {
   const { store, profile, refreshStore } = useAuth();
   const { showToast } = useToast();
+  useLanguage(); // Re-render this form when the language changes.
 
   const [storeName, setStoreName] = useState("");
   const [storeAddress, setStoreAddress] = useState("");
@@ -76,8 +76,8 @@ export default function SettingsPage() {
         })
         .eq("id", profile.id);
       if (res.error) throw new Error(res.error.message);
+      await refreshStore();
       showToast(t("toast.profileUpdated"));
-      window.location.reload();
     } catch (err) {
       showToast(err instanceof Error ? err.message : t("common.error"), "error");
     } finally {
@@ -146,12 +146,19 @@ export default function SettingsPage() {
             <Select
               label={t("settings.store.language")}
               value={language}
-              onChange={(e) => setLanguageState(e.target.value)}
+              hint={t("settings.store.languageHint")}
+              onChange={(e) => {
+                const next = e.target.value;
+                setLanguageState(next);
+                // Preview instantly; the form's Save persists it to the store.
+                setLanguage(next);
+              }}
             >
-              <option value="fr">Français</option>
-              <option value="ar" disabled>
-                العربية ({t("settings.store.languageSoon")})
-              </option>
+              {LANGUAGES.map((meta) => (
+                <option key={meta.code} value={meta.code}>
+                  {meta.label}
+                </option>
+              ))}
             </Select>
           </div>
           <div className="flex justify-end">

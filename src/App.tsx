@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Fragment, useState } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { FullScreenSpinner } from "./components/ui/Spinner";
@@ -19,12 +25,14 @@ import ReportsPage from "./pages/reports/ReportsPage";
 import SettingsPage from "./pages/settings/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { isSupabaseConfigured } from "./lib/supabaseClient";
-import { t } from "./i18n";
+import { t, useLanguage } from "./i18n";
 
 function ConfigErrorScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-neutral-50 p-6 text-center">
-      <h1 className="text-lg font-semibold text-neutral-900">{t("configError.title")}</h1>
+      <h1 className="text-lg font-semibold text-neutral-900">
+        {t("configError.title")}
+      </h1>
       <p className="max-w-md text-sm leading-relaxed text-neutral-500">
         {t("configError.body")}
       </p>
@@ -50,17 +58,25 @@ function StoreMissingScreen() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-neutral-50 p-6 text-center">
-      <h1 className="text-lg font-semibold text-neutral-900">{t("storeMissing.title")}</h1>
-      <p className="max-w-md text-sm leading-relaxed text-neutral-500">{t("storeMissing.body")}</p>
+      <h1 className="text-lg font-semibold text-neutral-900">
+        {t("storeMissing.title")}
+      </h1>
+      <p className="max-w-md text-sm leading-relaxed text-neutral-500">
+        {t("storeMissing.body")}
+      </p>
       {userDataError && (
         <div className="max-w-md rounded-lg border border-red-200 bg-red-50 p-3 text-start">
           <p className="text-xs font-semibold uppercase tracking-wide text-red-700">
             {t("storeMissing.errorLabel")}
           </p>
-          <p className="mt-1 break-words font-mono text-xs text-red-700">{userDataError}</p>
+          <p className="mt-1 break-words font-mono text-xs text-red-700">
+            {userDataError}
+          </p>
         </div>
       )}
-      <p className="max-w-md text-xs text-neutral-400">{t("storeMissing.hint")}</p>
+      <p className="max-w-md text-xs text-neutral-400">
+        {t("storeMissing.hint")}
+      </p>
       <div className="flex gap-3">
         <button
           type="button"
@@ -99,57 +115,73 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/**
+ * `t()` resolves at render time, so switching languages has to re-render every
+ * component that calls it. Keying this subtree remounts the routes on change,
+ * which keeps the 400+ existing `t()` call sites free of per-component
+ * subscriptions. It sits inside the providers so the session and queued toasts
+ * survive the switch.
+ */
+function LocalizedRoutes() {
+  const language = useLanguage();
+  return (
+    <Fragment key={language}>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <PublicOnly>
+              <LoginPage />
+            </PublicOnly>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicOnly>
+              <SignupPage />
+            </PublicOnly>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnly>
+              <ForgotPasswordPage />
+            </PublicOnly>
+          }
+        />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route
+          element={
+            <RequireAuth>
+              <AppLayout />
+            </RequireAuth>
+          }
+        >
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/products/:productId" element={<ProductDetailPage />} />
+          <Route path="/inventory" element={<InventoryPage />} />
+          <Route path="/carnet" element={<CarnetPage />} />
+          <Route path="/carnet/:customerId" element={<CustomerDetailPage />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Fragment>
+  );
+}
+
 export default function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   return (
     <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
-          <Routes>
-            <Route
-              path="/login"
-              element={
-                <PublicOnly>
-                  <LoginPage />
-                </PublicOnly>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
-                <PublicOnly>
-                  <SignupPage />
-                </PublicOnly>
-              }
-            />
-            <Route
-              path="/forgot-password"
-              element={
-                <PublicOnly>
-                  <ForgotPasswordPage />
-                </PublicOnly>
-              }
-            />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route
-              element={
-                <RequireAuth>
-                  <AppLayout />
-                </RequireAuth>
-              }
-            >
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/:productId" element={<ProductDetailPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/carnet" element={<CarnetPage />} />
-              <Route path="/carnet/:customerId" element={<CustomerDetailPage />} />
-              <Route path="/suppliers" element={<SuppliersPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <LocalizedRoutes />
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

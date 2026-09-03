@@ -58,7 +58,13 @@ export default function StockValueReport() {
   const handleExport = () => {
     downloadCsv(
       `valeur-stock-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["Produit", "Catégorie", "Quantité", "Prix d'achat", "Valeur"],
+      [
+        t("reports.stockValue.product"),
+        t("reports.stockValue.category"),
+        t("reports.stockValue.qty"),
+        t("reports.stockValue.cost"),
+        t("reports.stockValue.value"),
+      ],
       rows.map((p) => [
         p.name,
         categories.find((c) => c.id === p.category_id)?.name ?? "",

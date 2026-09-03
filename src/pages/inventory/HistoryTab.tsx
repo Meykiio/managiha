@@ -67,7 +67,14 @@ export default function HistoryTab() {
   const handleExport = () => {
     downloadCsv(
       `mouvements-stock-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["Produit", "Type", "Quantité", "Motif", "Note", "Date"],
+      [
+        t("inventory.history.table.product"),
+        t("common.type"),
+        t("common.quantity"),
+        t("common.reason"),
+        t("common.notes"),
+        t("common.date"),
+      ],
       rows.map((m) => [
         m.product?.name ?? "",
         movementLabel(m.movement_type),
@@ -89,7 +96,7 @@ export default function HistoryTab() {
           <option value="">{t("inventory.history.allTypes")}</option>
           {MOVEMENT_TYPES.map((m) => (
             <option key={m.value} value={m.value}>
-              {m.label}
+              {t(m.labelKey)}
             </option>
           ))}
         </Select>

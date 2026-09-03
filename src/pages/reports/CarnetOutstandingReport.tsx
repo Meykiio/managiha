@@ -35,7 +35,12 @@ export default function CarnetOutstandingReport() {
   const handleExport = () => {
     downloadCsv(
       `carnet-impayes-${new Date().toISOString().slice(0, 10)}.csv`,
-      ["Client", "Téléphone", "Solde dû", "Dernière activité"],
+      [
+        t("reports.carnetOutstanding.customer"),
+        t("reports.carnetOutstanding.phone"),
+        t("reports.carnetOutstanding.balance"),
+        t("reports.carnetOutstanding.lastActivity"),
+      ],
       rows.map((c) => [c.full_name, c.phone ?? "", Number(c.balance), fmtDate(c.updated_at)])
     );
   };

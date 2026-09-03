@@ -1,10 +1,20 @@
+import { getLocale, t } from "../i18n";
+
+function currency(): string {
+  return t("currency.dzd");
+}
+
+function fmtNumber(value: number, options: Intl.NumberFormatOptions): string {
+  return new Intl.NumberFormat(getLocale(), options).format(value);
+}
+
 export function fmtMoney(value: number | null | undefined, decimals = 2): string {
   const n = Number(value ?? 0);
-  const formatted = new Intl.NumberFormat("fr-FR", {
+  const formatted = fmtNumber(n, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(n);
-  return `${formatted} DZD`;
+  });
+  return `${formatted} ${currency()}`;
 }
 
 export function fmtMoneyShort(value: number | null | undefined): string {
@@ -16,39 +26,37 @@ export function fmtMoneyShort(value: number | null | undefined): string {
 export function signedAmount(value: number): string {
   const n = Number(value ?? 0);
   const sign = n > 0 ? "+" : n < 0 ? "-" : "";
-  const formatted = new Intl.NumberFormat("fr-FR", {
+  const formatted = fmtNumber(Math.abs(n), {
     minimumFractionDigits: Math.abs(n % 1) > 0 ? 2 : 0,
     maximumFractionDigits: 2,
-  }).format(Math.abs(n));
-  return `${sign}${formatted} DZD`;
+  });
+  return `${sign}${formatted} ${currency()}`;
 }
 
 export function signedQty(value: number): string {
   const n = Number(value ?? 0);
   const sign = n > 0 ? "+" : "";
-  const formatted = new Intl.NumberFormat("fr-FR", {
-    maximumFractionDigits: 3,
-  }).format(n);
+  const formatted = fmtNumber(n, { maximumFractionDigits: 3 });
   return `${sign}${formatted}`;
 }
 
 export function fmtQty(value: number): string {
   const n = Number(value ?? 0);
-  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 3 }).format(n);
+  return fmtNumber(n, { maximumFractionDigits: 3 });
 }
 
 export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "short" }).format(d);
+  return new Intl.DateTimeFormat(getLocale(), { dateStyle: "short" }).format(d);
 }
 
 export function fmtDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: "short",
     timeStyle: "short",
   }).format(d);

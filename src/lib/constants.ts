@@ -1,49 +1,53 @@
 import type { MovementType, TransactionType, Unit } from "./types";
+import { t, type TranslationKey } from "../i18n";
 
 export const PAGE_SIZE = 20;
 
 export interface UnitOption {
   value: Unit;
-  label: string;
-  short: string;
+  labelKey: TranslationKey;
+  shortKey: TranslationKey;
 }
 
 export const UNITS: UnitOption[] = [
-  { value: "piece", label: "Pièce", short: "p" },
-  { value: "kg", label: "Kilogramme", short: "kg" },
-  { value: "g", label: "Gramme", short: "g" },
-  { value: "liter", label: "Litre", short: "L" },
-  { value: "box", label: "Boîte", short: "boîte" },
-  { value: "pack", label: "Pack", short: "pack" },
+  { value: "piece", labelKey: "unit.piece", shortKey: "unit.short.piece" },
+  { value: "kg", labelKey: "unit.kg", shortKey: "unit.short.kg" },
+  { value: "g", labelKey: "unit.g", shortKey: "unit.short.g" },
+  { value: "liter", labelKey: "unit.liter", shortKey: "unit.short.liter" },
+  { value: "box", labelKey: "unit.box", shortKey: "unit.short.box" },
+  { value: "pack", labelKey: "unit.pack", shortKey: "unit.short.pack" },
 ];
 
 export function unitLabel(unit: string): string {
-  return UNITS.find((u) => u.value === unit)?.label ?? unit;
+  const option = UNITS.find((u) => u.value === unit);
+  return option ? t(option.labelKey) : unit;
 }
 
 export function unitShort(unit: string): string {
-  return UNITS.find((u) => u.value === unit)?.short ?? "";
+  const option = UNITS.find((u) => u.value === unit);
+  return option ? t(option.shortKey) : "";
 }
 
 export interface MovementTypeOption {
   value: MovementType;
-  label: string;
+  labelKey: TranslationKey;
   direction: "in" | "out" | "delta";
 }
 
 export const MOVEMENT_TYPES: MovementTypeOption[] = [
-  { value: "receive", label: "Réception", direction: "in" },
-  { value: "sale", label: "Vente", direction: "out" },
-  { value: "return", label: "Retour", direction: "in" },
-  { value: "damage", label: "Dommage", direction: "out" },
-  { value: "theft", label: "Vol", direction: "out" },
-  { value: "count_adjustment", label: "Comptage", direction: "delta" },
-  { value: "correction", label: "Correction", direction: "delta" },
-  { value: "opening_balance", label: "Stock initial", direction: "in" },
+  { value: "receive", labelKey: "movement.receive", direction: "in" },
+  { value: "sale", labelKey: "movement.sale", direction: "out" },
+  { value: "return", labelKey: "movement.return", direction: "in" },
+  { value: "damage", labelKey: "movement.damage", direction: "out" },
+  { value: "theft", labelKey: "movement.theft", direction: "out" },
+  { value: "count_adjustment", labelKey: "movement.count_adjustment", direction: "delta" },
+  { value: "correction", labelKey: "movement.correction", direction: "delta" },
+  { value: "opening_balance", labelKey: "movement.opening_balance", direction: "in" },
 ];
 
 export function movementLabel(type: string): string {
-  return MOVEMENT_TYPES.find((m) => m.value === type)?.label ?? type;
+  const option = MOVEMENT_TYPES.find((m) => m.value === type);
+  return option ? t(option.labelKey) : type;
 }
 
 export function movementDirection(type: string): "in" | "out" | "delta" {
@@ -52,24 +56,25 @@ export function movementDirection(type: string): "in" | "out" | "delta" {
 
 export interface AdjustReasonOption {
   value: MovementType;
-  label: string;
+  labelKey: TranslationKey;
 }
 
 export const ADJUST_REASONS: AdjustReasonOption[] = [
-  { value: "count_adjustment", label: "Comptage" },
-  { value: "damage", label: "Dommage" },
-  { value: "theft", label: "Vol" },
-  { value: "correction", label: "Correction" },
+  { value: "count_adjustment", labelKey: "movement.count_adjustment" },
+  { value: "damage", labelKey: "movement.damage" },
+  { value: "theft", labelKey: "movement.theft" },
+  { value: "correction", labelKey: "movement.correction" },
 ];
 
-export const TRANSACTION_TYPES: { value: TransactionType; label: string }[] = [
-  { value: "credit", label: "Crédit" },
-  { value: "payment", label: "Paiement" },
-  { value: "adjustment", label: "Ajustement" },
+export const TRANSACTION_TYPES: { value: TransactionType; labelKey: TranslationKey }[] = [
+  { value: "credit", labelKey: "transaction.credit" },
+  { value: "payment", labelKey: "transaction.payment" },
+  { value: "adjustment", labelKey: "transaction.adjustment" },
 ];
 
 export function transactionLabel(type: string): string {
-  return TRANSACTION_TYPES.find((t) => t.value === type)?.label ?? type;
+  const option = TRANSACTION_TYPES.find((tx) => tx.value === type);
+  return option ? t(option.labelKey) : type;
 }
 
 export const SIDEBAR_COLLAPSED_KEY = "managiha_sidebar_collapsed";

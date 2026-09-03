@@ -49,7 +49,7 @@ Try it without setting anything up:
 - **Carnet** — customer list with balances, credit/payment entries (pick-or-create customer), customer detail with running balance, payment recording, and a **pre-filled WhatsApp reminder link** (wa.me — no API integration).
 - **Suppliers** — contacts + WhatsApp links + linked products.
 - **Reports** — low-stock, stock value, movement summary by date, carnet outstanding — all exportable as CSV (Excel-friendly, `;` + BOM).
-- **Settings** — store profile, DZD fixed, French-only language selector structured for Arabic/RTL, read-only plan.
+- **Settings** — store profile, DZD fixed, working language selector (Français / العربية / English, the Arabic choice flipping the whole UI to RTL), read-only plan.
 
 No POS, no invoicing, no staff roles, no multi-store, no billing. Deliberately minimal.
 
@@ -110,7 +110,7 @@ Supabase Storage                 →  product images (private bucket, per-store 
 - **Atomic money & stock logic** — `products.current_stock` and `carnet_customers.balance` are only ever modified by two Postgres functions (`adjust_stock`, `record_carnet_transaction`) which lock the row, validate, update and log the movement in one transaction. The frontend never writes those columns — and **database triggers reject any direct client write to them**.
 - **Signed quantities** — movements store `+10` / `-3`; the UI formats the sign.
 - **Immutable history** — movements and carnet transactions have no UPDATE/DELETE policies.
-- **RTL-ready** — logical CSS properties (`ps-*`, `me-*`, `start-*`…) + an i18n layer; Arabic only needs a dictionary + a `dir` flip.
+- **Trilingual, RTL included** — French, Arabic, and English dictionaries with compile-time key parity (`Record<TranslationKey, string>`, so a missing translation fails `tsc`). Logical CSS properties (`ps-*`, `me-*`, `start-*`…) mean Arabic mirrors the layout by flipping `dir`; numbers stay in Latin digits to match Algerian price tags.
 - **No decorative charts** — tables and KPI cards only.
 
 Docs with the full story (the behind-the-scenes of how this was built):
@@ -127,7 +127,7 @@ Docs with the full story (the behind-the-scenes of how this was built):
 ## Testing
 
 ```bash
-npm test   # vitest + Testing Library (58 tests)
+npm test   # vitest + Testing Library (74 tests)
 ```
 
 Tests cover the formatting helpers (DZD, signed amounts, `wa.me` phone normalization), CSV escaping, stock-status boundaries, i18n/RTL switching, form validation — and the contracts that matter: the carnet and stock-adjust flows are tested against a fake Supabase client, asserting the **correct RPC is called** and that **no direct writes to balance/stock ever occur**.
@@ -147,7 +147,7 @@ Supabase's built-in email sender is capped at **2 emails/hour** — for real use
 - Product image uploads (storage infra ready, UI pending)
 - History pagination (movements / transactions currently capped at newest 50/100)
 - Category management (rename/archive)
-- Arabic UI (structure ready)
+- Arabic copy review by a native speaker (the dictionary is complete MSA; wording could use a shopkeeper's ear)
 
 ---
 
@@ -157,7 +157,7 @@ Found a bug? Open an issue. Want to improve the French/UI or add a flow? Keep th
 
 - Files stay under ~250 lines.
 - Soft-delete only; stock/balance writes must go through the RPCs.
-- Every UI string goes through `src/i18n/`.
+- Every UI string goes through `src/i18n/`, with a key added to all three languages (fr / ar / en).
 - `npm test` stays green; SQL suite passes before merging schema changes.
 
 ---

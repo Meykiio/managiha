@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { ensureCategory, fetchCategories } from "../../lib/api";
 import type { Category } from "../../lib/types";
 import { cn } from "../../lib/utils";
+import { t } from "../../i18n";
 
 interface CategoryComboProps {
   storeId: string;
@@ -67,13 +68,13 @@ export function CategoryCombo({ storeId, value, onChange }: CategoryComboProps) 
         htmlFor="category-combo"
         className="mb-1.5 block text-sm font-medium text-neutral-700"
       >
-        Catégorie
+        {t("productForm.category")}
       </label>
       <input
         id="category-combo"
         autoComplete="off"
         value={text}
-        placeholder="Choisir ou créer une catégorie"
+        placeholder={t("productForm.categoryPlaceholder")}
         onFocus={() => setOpen(true)}
         onChange={(e) => {
           setText(e.target.value);

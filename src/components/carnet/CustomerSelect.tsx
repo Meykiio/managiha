@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { searchCarnetCustomers } from "../../lib/api";
 import { fmtMoney } from "../../lib/format";
 import type { CarnetCustomer } from "../../lib/types";
+import { t } from "../../i18n";
 
 interface CustomerSelectProps {
   value: string | null;
@@ -38,7 +39,7 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
 
   const selectedName =
     results.find((c) => c.id === value)?.full_name ??
-    (value ? "Client sélectionné" : null);
+    (value ? t("customerSelect.selected") : null);
 
   return (
     <div className="relative w-full" ref={rootRef}>
@@ -55,7 +56,9 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
         )}
       >
         <span className="truncate">
-          {selectedName ?? <span className="text-neutral-400">Rechercher un client…</span>}
+          {selectedName ?? (
+            <span className="text-neutral-400">{t("carnetEntry.customerPlaceholder")}</span>
+          )}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
       </button>
@@ -68,7 +71,7 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un client…"
+                placeholder={t("carnetEntry.customerPlaceholder")}
                 className="h-10 w-full rounded-lg border border-neutral-200 ps-9 pe-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
               />
             </div>
@@ -76,7 +79,9 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
           <ul role="listbox" className="max-h-56 overflow-y-auto p-1.5">
             {!open && null}
             {results.length === 0 && (
-              <li className="px-3 py-2 text-sm text-neutral-500">Aucun client trouvé</li>
+              <li className="px-3 py-2 text-sm text-neutral-500">
+                {t("customerSelect.noResults")}
+              </li>
             )}
             {results.map((c) => (
               <li key={c.id}>

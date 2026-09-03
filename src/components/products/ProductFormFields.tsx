@@ -85,7 +85,7 @@ export function ProductFormFields({
         >
           {UNITS.map((u) => (
             <option key={u.value} value={u.value}>
-              {u.label}
+              {t(u.labelKey)}
             </option>
           ))}
         </Select>
@@ -132,7 +132,7 @@ export function ProductFormFields({
           min="0"
           value={values.currentStock}
           hint={
-            isEdit ? undefined : "Le stock initial sera enregistré comme mouvement « Stock initial »."
+            isEdit ? undefined : t("productForm.openingStockHint")
           }
           onChange={(e) => set("currentStock", e.target.value)}
         />
@@ -188,11 +188,11 @@ export function productFormErrors(
   values: ProductFormValues
 ): Partial<Record<keyof ProductFormValues, string>> {
   const errors: Partial<Record<keyof ProductFormValues, string>> = {};
-  if (!values.name.trim()) errors.name = "Le nom est obligatoire";
+  if (!values.name.trim()) errors.name = t("validation.nameRequired");
   for (const key of ["costPrice", "sellPrice"] as const) {
     const raw = values[key];
     if (raw !== "" && (Number.isNaN(Number(raw)) || Number(raw) < 0)) {
-      errors[key] = "Montant invalide";
+      errors[key] = t("validation.amountInvalid");
     }
   }
   return errors;

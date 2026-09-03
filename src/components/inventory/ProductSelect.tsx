@@ -7,12 +7,15 @@ import { fetchActiveProductsLite, type ProductLite } from "../../lib/api";
 import { stockStatusTone, Badge } from "../ui/Badge";
 import { Spinner } from "../ui/Spinner";
 import type { StockStatus } from "../../lib/types";
+import { t } from "../../i18n";
 
-const STATUS_LABEL: Record<StockStatus, string> = {
-  healthy: "OK",
-  low: "Faible",
-  out: "Rupture",
+const STATUS_KEY: Record<StockStatus, "healthy" | "low" | "out"> = {
+  healthy: "healthy",
+  low: "low",
+  out: "out",
 };
+
+const statusLabel = (status: StockStatus) => t(`products.status.${STATUS_KEY[status]}`);
 
 interface ProductSelectProps {
   value: string | null;
@@ -37,7 +40,7 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
         if (!cancelled) setProducts(rows);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Erreur");
+        if (!cancelled) setError(err instanceof Error ? err.message : t("common.error"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -88,23 +91,26 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
         <span className="truncate">
           {loading ? (
             <span className="flex items-center gap-2 text-neutral-400">
-              <Spinner className="h-4 w-4" /> Chargement…
+              <Spinner className="h-4 w-4" /> {t("common.loading")}
             </span>
           ) : selected ? (
             selected.name
           ) : (
-            <span className="text-neutral-400">Rechercher un produit…</span>
+            <span className="text-neutral-400">
+              {t("inventory.receive.productPlaceholder")}
+            </span>
           )}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
       </button>
       {selected && !open && (
         <p className="mt-1 text-xs text-neutral-500">
-          Stock actuel :{" "}
+          {t("productSelect.currentStock")}
+          {": "}
           <span className="font-semibold tnum">{fmtQty(selected.current_stock)}</span>{" "}
           {unitShort(selected.unit)} ·{" "}
           <Badge tone={stockStatusTone(selected.stock_status)} dot>
-            {STATUS_LABEL[selected.stock_status]}
+            {statusLabel(selected.stock_status)}
           </Badge>
         </p>
       )}
@@ -117,7 +123,7 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un produit…"
+                placeholder={t("inventory.receive.productPlaceholder")}
                 className="h-10 w-full rounded-lg border border-neutral-200 ps-9 pe-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
               />
             </div>
@@ -125,7 +131,9 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
           <ul role="listbox" className="max-h-56 overflow-y-auto p-1.5">
             {error && <li className="px-3 py-2 text-sm text-red-600">{error}</li>}
             {!loading && filtered.length === 0 && !error && (
-              <li className="px-3 py-2 text-sm text-neutral-500">Aucun produit trouvé</li>
+              <li className="px-3 py-2 text-sm text-neutral-500">
+                {t("productSelect.noResults")}
+              </li>
             )}
             {filtered.map((p) => (
               <li key={p.id}>

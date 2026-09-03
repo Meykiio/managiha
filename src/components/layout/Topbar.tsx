@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import { useLocation, matchPath } from "react-router-dom";
 import { ProfileMenu } from "./ProfileMenu";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { t } from "../../i18n";
 
 function resolveTitle(pathname: string): string {
@@ -35,7 +36,8 @@ export function Topbar({ onOpenMobileNav }: TopbarProps) {
       <h1 className="truncate text-base font-semibold text-neutral-900 lg:text-lg">
         {title}
       </h1>
-      <div className="ms-auto">
+      <div className="ms-auto flex items-center gap-1">
+        <LanguageSwitcher />
         <ProfileMenu />
       </div>
     </header>

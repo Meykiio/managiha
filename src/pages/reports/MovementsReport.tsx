@@ -140,7 +140,11 @@ export default function MovementsReport() {
                 onClick={() =>
                   downloadCsv(
                     `mouvements-${applied!.from}_${applied!.to}.csv`,
-                    ["Type", "Nombre", "Quantité nette"],
+                    [
+                      t("reports.movements.type"),
+                      t("reports.movements.count"),
+                      t("reports.movements.netQty"),
+                    ],
                     summary.map((s) => [movementLabel(s.value), s.count, s.net])
                   )
                 }

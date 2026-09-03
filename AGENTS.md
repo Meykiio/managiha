@@ -18,7 +18,7 @@ French-first web platform for Algerian mini-market owners: product stock + custo
 npm run dev        # dev server
 npm run build      # tsc + vite build
 npm run typecheck  # tsc --noEmit
-npm test           # vitest run (58 tests)
+npm test           # vitest run (74 tests)
 ```
 
 ## Architecture rules (enforced by tests — do not bypass)
@@ -28,7 +28,11 @@ npm test           # vitest run (58 tests)
    - `record_carnet_transaction`: `credit` adds, `payment` subtracts, `adjustment` signed; overpayment is allowed (negative balance = advance, by design).
 2. **Soft-delete only** (`archived_at`) for products/categories/suppliers/carnet customers. No hard delete anywhere.
 3. **History is immutable** — no UPDATE/DELETE policies on `stock_movements` or `carnet_transactions`; corrections go through new movements.
-4. **i18n.** All UI strings go through `src/i18n/` (`fr-core.ts` + `fr-pages.ts`) via `t("key")`. Add keys, never inline French in components. Layout uses logical CSS properties (`ps-*`/`me-*`/`start-*` / `end-*`) — keep RTL-safe.
+4. **i18n.** Trilingual: French (default), Arabic (MSA, RTL), English. All UI strings go through `src/i18n/` via `t("key")` — never inline a literal in a component, including `placeholder`, `aria-label`, validation messages, and CSV headers.
+   - Every key must exist in all three languages: `fr-core`/`fr-pages`, `ar-core`/`ar-pages`, `en-core`/`en-pages`. The `ar.ts`/`en.ts` aggregators are typed `Record<TranslationKey, string>`, so a missing key fails `typecheck`, and `i18n.test.ts` asserts parity both ways.
+   - `t()` resolves at render time and `App.tsx` keys the routed subtree on the active language, so switching remounts and re-translates everything. Use `useLanguage()` only for UI that must re-render outside that subtree.
+   - Never hardcode a locale in a formatter: `src/lib/format.ts` reads `getLocale()`. Arabic is pinned to `ar-DZ-u-nu-latn-ca-gregory` (Latin digits, Gregorian calendar) to match Algerian price tags and invoices.
+   - Layout uses logical CSS properties (`ps-*`/`me-*`/`start-*` / `end-*`) — keep RTL-safe, and confirm Arabic sets `dir="rtl"`.
 5. **File size ≤ ~250 lines.** Split components; `Pagination`, `Tabs`, `Modal`, `Card`, `EmptyState` are the UI kit.
 
 ## Patterns
@@ -49,10 +53,10 @@ npm test           # vitest run (58 tests)
 
 ## Verification
 
-- Before finishing any task: `npm run typecheck` + `npm test` (must stay 58/58 green).
+- Before finishing any task: `npm run typecheck` + `npm test` (must stay 74/74 green).
 - After schema/RPC changes: run `supabase/tests/rls_rpc_tests.sql` in the SQL Editor of a test project (19 assertions; it self-cleans). Rules of thumb: files with UTF-8 content must never be rewritten with PowerShell 5.1 `Get-Content`/`Set-Content` (encoding corruption); use the Write/Edit tools or Node scripts.
 - Commit after each meaningful phase (repo convention: conventional commits, e.g. `fix(guard): split per-table triggers`).
 
 ## Out of scope (never add without being asked)
 
-POS/checkout, fiscal invoicing, staff roles, multi-store, CSV import, offline sync, billing UI, decorative charts, Arabic as a *functional* language (structure only), product-image upload (UI pending), and any hard-delete affordance.
+POS/checkout, fiscal invoicing, staff roles, multi-store, CSV import, offline sync, billing UI, decorative charts, product-image upload (UI pending), any hard-delete affordance, and additional languages beyond fr/ar/en (each new one must be complete, not partial).

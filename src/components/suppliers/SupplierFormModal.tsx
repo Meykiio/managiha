@@ -54,7 +54,7 @@ export function SupplierFormModal({ open, onClose, editing, onSaved }: SupplierF
     e.preventDefault();
     if (!store) return;
     if (!form.name.trim()) {
-      setFormError("Le nom est obligatoire");
+      setFormError(t("validation.nameRequired"));
       return;
     }
     setSaving(true);

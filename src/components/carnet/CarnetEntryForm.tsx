@@ -47,14 +47,14 @@ export function CarnetEntryForm({
     let finalCustomerId = customerId;
 
     if (isNewCustomer) {
-      if (!newName.trim()) nextErrors.newName = "Le nom est obligatoire";
+      if (!newName.trim()) nextErrors.newName = t("validation.nameRequired");
     } else if (!finalCustomerId) {
-      nextErrors.customer = "Sélectionnez un client";
+      nextErrors.customer = t("validation.selectCustomer");
     }
 
     const parsedAmount = Number(amount.replace(",", "."));
     if (!amount || Number.isNaN(parsedAmount) || parsedAmount <= 0)
-      nextErrors.amount = "Entrez un montant supérieur à 0";
+      nextErrors.amount = t("validation.amountPositive");
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;

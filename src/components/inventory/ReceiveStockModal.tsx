@@ -1,5 +1,6 @@
 import { Modal } from "../ui/Modal";
 import { ReceiveStockForm } from "./ReceiveStockForm";
+import { t } from "../../i18n";
 
 interface ReceiveStockModalProps {
   open: boolean;
@@ -15,7 +16,7 @@ export function ReceiveStockModal({
   onSaved,
 }: ReceiveStockModalProps) {
   return (
-    <Modal open={open} onClose={onClose} title="Réceptionner du stock">
+    <Modal open={open} onClose={onClose} title={t("inventory.receive.title")}>
       <div className="pb-3">
         <ReceiveStockForm
           presetProductId={open ? (presetProductId ?? null) : null}
