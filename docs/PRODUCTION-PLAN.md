@@ -63,11 +63,11 @@ Each sprint ships, commits (conventional commits), and passes its gate before th
 - Gate: deep links work on prod, boundary renders in a forced test, CI green on GitHub. **PASSED 7 Sep 2026: /carnet, /reset-password, /products/x all 200 on production; CI run 34141265286 green in 38s.**
 
 ### Sprint 1 - Truth in the numbers (1 day)
-- [ ] MovementsReport: server-side pagination with PAGE_SIZE + range cap (F05)
-- [ ] Product movements history: paginated (F09)
-- [ ] Customer transactions: paginated (F09)
-- [ ] grep gate: no unbounded `.select(` without `.range`/`.limit` on data tables
-- Gate: vitest 58+ green, SQL suite 19/19, reports still export CSV correctly.
+- [x] MovementsReport: server-side pagination with PAGE_SIZE + range cap (F05)
+- [x] Product movements history: paginated (F09)
+- [x] Customer transactions: paginated (F09)
+- [x] grep gate: no unbounded `.select(` without `.range`/`.limit` on data tables
+- Gate: vitest 58+ green, SQL suite 19/19, reports still export CSV correctly. **PASSED 7 Sep 2026 (partial): vitest 58/58, all data queries bounded (manual audit: every .select has range/limit or is single-row; caps added to categories 500, suppliers 500, carnet outstanding 2000), movements summary now computed server-side by new RPC 00010. SQL suite deferred until the new Supabase project exists (owner deleted the old one; run all-in-one + tests/rls_rpc_tests.sql + seed-demo.sql at setup).**
 
 ### Sprint 2 - Real-life flows (1-2 days)
 - [ ] DECISION (do first): minimal "Vente" quick action - product + qty (+ optional note) calling `adjust_stock('sale')`. No cart, no totals, no payments (stays out of POS). If No: remove 'sale' from UI constants and document. (F11)

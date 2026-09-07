@@ -15,7 +15,8 @@ export async function fetchCategories(storeId: string): Promise<Category[]> {
     .select("*")
     .eq("store_id", storeId)
     .is("archived_at", null)
-    .order("name");
+    .order("name")
+    .limit(500);
   if (error) throw new Error(error.message);
   return data ?? [];
 }
@@ -43,7 +44,7 @@ export async function fetchSuppliers(
 ): Promise<Supplier[]> {
   let query = supabase.from("suppliers").select("*").eq("store_id", storeId);
   if (!includeArchived) query = query.is("archived_at", null);
-  const { data, error } = await query.order("name");
+  const { data, error } = await query.order("name").limit(500);
   if (error) throw new Error(error.message);
   return data ?? [];
 }

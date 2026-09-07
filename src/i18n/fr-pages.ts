@@ -13,6 +13,7 @@
   "dash.empty.movements": "Aucun mouvement pour le moment.",
   "dash.empty.carnet": "Aucune activité carnet pour le moment.",
   "dash.error.title": "Impossible de charger le tableau de bord",
+  "dash.viewAll": "Voir tout",
 
   "products.title": "Produits",
   "products.subtitle": "Gérez votre catalogue et vos prix.",

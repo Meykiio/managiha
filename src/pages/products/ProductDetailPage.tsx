@@ -17,7 +17,7 @@ import {
 } from "../../components/products/ProductFormFields";
 import { ProductMovements } from "../../components/products/ProductMovements";
 import { ProductSummary } from "../../components/products/ProductSummary";
-import type { Category, Product, StockMovement } from "../../lib/types";
+import type { Category, Product } from "../../lib/types";
 import { fmtDate, fmtDateTime, fmtMoneyShort, fmtQty, signedQty } from "../../lib/format";
 import { unitShort } from "../../lib/constants";
 import { movementLabel } from "../../lib/constants";
@@ -30,7 +30,6 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [categoryName, setCategoryName] = useState<string | null>(null);
-  const [movements, setMovements] = useState<StockMovement[]>([]);
   const [loading, setLoading] = useState(true);
   const [values, setValues] = useState<ProductFormValues | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof ProductFormValues, string>>>({});
@@ -42,20 +41,10 @@ export default function ProductDetailPage() {
     if (!productId) return;
     setLoading(true);
     try {
-      const [prodRes, movRes] = await Promise.all([
-        supabase.from("products").select("*").eq("id", productId).maybeSingle(),
-        supabase
-          .from("stock_movements")
-          .select("*")
-          .eq("product_id", productId)
-          .order("created_at", { ascending: false })
-          .limit(50),
-      ]);
+      const prodRes = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
       if (prodRes.error) throw new Error(prodRes.error.message);
-      if (movRes.error) throw new Error(movRes.error.message);
       const p = prodRes.data as Product | null;
       setProduct(p);
-      setMovements(movRes.data ?? []);
       if (p) {
         setValues({
           name: p.name,
@@ -218,7 +207,7 @@ export default function ProductDetailPage() {
         <ProductSummary product={product} categoryName={categoryName} />
       </div>
 
-      <ProductMovements movements={movements} />
+      <ProductMovements productId={product.id} />
 
       <ConfirmDialog
         open={archiveOpen}

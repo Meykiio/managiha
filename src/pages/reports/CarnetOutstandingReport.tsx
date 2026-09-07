@@ -24,6 +24,7 @@ export default function CarnetOutstandingReport() {
       .is("archived_at", null)
       .gt("balance", 0)
       .order("balance", { ascending: false })
+      .limit(2000)
       .then(({ data }) => {
         setRows((data ?? []) as CarnetCustomer[]);
         setLoading(false);

@@ -181,10 +181,26 @@ export default function DashboardPage() {
       </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card title={t("dash.movements.title")} bodyClassName="px-0 pb-2 pt-1">
+        <Card
+          title={t("dash.movements.title")}
+          bodyClassName="px-0 pb-2 pt-1"
+          action={
+            <Link to="/inventory?tab=history" className="text-sm font-medium text-primary-600 hover:text-primary-700">
+              {t("dash.viewAll")}
+            </Link>
+          }
+        >
           <MovementFeed movements={movements} />
         </Card>
-        <Card title={t("dash.carnet.title")} bodyClassName="px-0 pb-2 pt-1">
+        <Card
+          title={t("dash.carnet.title")}
+          bodyClassName="px-0 pb-2 pt-1"
+          action={
+            <Link to="/carnet" className="text-sm font-medium text-primary-600 hover:text-primary-700">
+              {t("dash.viewAll")}
+            </Link>
+          }
+        >
           <CarnetFeed transactions={transactions} />
         </Card>
       </div>

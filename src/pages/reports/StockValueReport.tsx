@@ -47,6 +47,7 @@ export default function StockValueReport() {
       .from("categories")
       .select("*")
       .eq("store_id", store.id)
+      .limit(500)
       .then(({ data }) => setCategories((data ?? []) as Category[]));
   }, [store]);
 

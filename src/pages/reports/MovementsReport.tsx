@@ -2,56 +2,69 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarRange } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { Card } from "../../components/ui/Card";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { downloadCsv, endOfDayIso, firstDayOfMonthIso, startOfDayIso, todayIso } from "../../lib/csv";
 import { fmtQty, signedQty } from "../../lib/format";
-import { MOVEMENT_TYPES, movementLabel } from "../../lib/constants";
-import type { StockMovement } from "../../lib/types";
+import { MOVEMENT_TYPES } from "../../lib/constants";
 import { t } from "../../i18n";
+
+interface SummaryRow {
+  movement_type: string;
+  movement_count: number;
+  net_qty: number;
+}
 
 export default function MovementsReport() {
   const { store } = useAuth();
+  const { showToast } = useToast();
   const [fromDate, setFromDate] = useState(firstDayOfMonthIso());
   const [toDate, setToDate] = useState(todayIso());
   const [applied, setApplied] = useState<{ from: string; to: string } | null>(null);
-
-  const [movements, setMovements] = useState<StockMovement[]>([]);
+  const [rows, setRows] = useState<SummaryRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!store || !applied) return;
+    let cancelled = false;
     setLoading(true);
     supabase
-      .from("stock_movements")
-      .select("*")
-      .eq("store_id", store.id)
-      .gte("created_at", startOfDayIso(applied.from))
-      .lte("created_at", endOfDayIso(applied.to))
-      .order("created_at")
-      .then(({ data }) => {
-        setMovements((data ?? []) as StockMovement[]);
+      .rpc("get_movements_summary", {
+        p_from: startOfDayIso(applied.from),
+        p_to: endOfDayIso(applied.to),
+      })
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) showToast(error.message, "error");
+        setRows(((data ?? []) as SummaryRow[]).slice());
         setLoading(false);
         setLoaded(true);
       });
-  }, [store, applied]);
+    return () => {
+      cancelled = true;
+    };
+  }, [store, applied, showToast]);
 
-  const summary = useMemo(() => {
-    const map = new Map<string, { count: number; net: number }>();
-    for (const m of movements) {
-      const entry = map.get(m.movement_type) ?? { count: 0, net: 0 };
-      entry.count += 1;
-      entry.net += Number(m.quantity);
-      map.set(m.movement_type, entry);
-    }
-    return MOVEMENT_TYPES.filter((mt) => map.has(mt.value)).map((mt) => ({
-      ...mt,
-      ...(map.get(mt.value) as { count: number; net: number }),
-    }));
-  }, [movements]);
+  const summary = useMemo(
+    () =>
+      MOVEMENT_TYPES.filter((mt) => rows.some((r) => r.movement_type === mt.value)).map((mt) => {
+        const row = rows.find((r) => r.movement_type === mt.value);
+        return { ...mt, count: Number(row?.movement_count ?? 0), net: Number(row?.net_qty ?? 0) };
+      }),
+    [rows]
+  );
+
+  const handleExport = () => {
+    downloadCsv(
+      `mouvements-${applied!.from}_${applied!.to}.csv`,
+      ["Type", "Nombre", "Quantité nette"],
+      summary.map((s) => [s.label, s.count, s.net])
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -86,14 +99,14 @@ export default function MovementsReport() {
           <EmptyState
             icon={CalendarRange}
             title={t("reports.movements.period")}
-            body={`${t("common.from")} ${fromDate} ${t("common.to").toLowerCase()} ${toDate}`}
+            body=""
             action={
               <Button onClick={() => setApplied({ from: fromDate, to: toDate })}>
                 {t("common.apply")}
               </Button>
             }
           />
-        ) : summary.length === 0 ? (
+        ) : summary.length === 0 && !loading ? (
           <EmptyState icon={CalendarRange} title={t("reports.movements.empty")} body="" />
         ) : (
           <>
@@ -109,8 +122,8 @@ export default function MovementsReport() {
                 <tbody className="divide-y divide-neutral-100">
                   {summary.map((s) => (
                     <tr key={s.value} className="hover:bg-neutral-50/60">
-                      <td className="px-5 py-3.5 font-medium text-neutral-900">{movementLabel(s.value)}</td>
-                      <td className="tnum px-3 py-3.5 text-neutral-700">{s.count}</td>
+                      <td className="px-5 py-3.5 font-medium text-neutral-900">{s.label}</td>
+                      <td className="tnum px-3 py-3.5 text-neutral-700">{fmtQty(s.count)}</td>
                       <td
                         className={`tnum px-5 py-3.5 text-end font-semibold ${
                           s.net >= 0 ? "text-emerald-600" : "text-red-600"
@@ -125,10 +138,10 @@ export default function MovementsReport() {
                   <tr className="border-t-2 border-neutral-200 bg-neutral-50 font-semibold">
                     <td className="px-5 py-3.5 text-neutral-900">{t("reports.movements.total")}</td>
                     <td className="tnum px-3 py-3.5 text-neutral-900">
-                      {fmtQty(movements.length)}
+                      {fmtQty(summary.reduce((sum, s) => sum + s.count, 0))}
                     </td>
                     <td className="tnum px-5 py-3.5 text-end text-neutral-900">
-                      {signedQty(movements.reduce((sum, m) => sum + Number(m.quantity), 0))}
+                      {signedQty(summary.reduce((sum, s) => sum + s.net, 0))}
                     </td>
                   </tr>
                 </tfoot>
@@ -137,13 +150,8 @@ export default function MovementsReport() {
             <div className="px-5 pb-4 pt-1">
               <Button
                 variant="secondary"
-                onClick={() =>
-                  downloadCsv(
-                    `mouvements-${applied!.from}_${applied!.to}.csv`,
-                    ["Type", "Nombre", "Quantité nette"],
-                    summary.map((s) => [movementLabel(s.value), s.count, s.net])
-                  )
-                }
+                onClick={handleExport}
+                disabled={summary.length === 0}
               >
                 {t("common.exportCsv")}
               </Button>

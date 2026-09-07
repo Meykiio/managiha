@@ -39,7 +39,8 @@ export default function SuppliersPage() {
         .from("suppliers")
         .select("*, products(count)")
         .eq("store_id", store.id)
-        .order("name");
+        .order("name")
+        .limit(500);
       if (showArchived) {
         query = query.not("archived_at", "is", null);
       } else {

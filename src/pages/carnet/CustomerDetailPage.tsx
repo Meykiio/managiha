@@ -13,7 +13,7 @@ import { Skeleton } from "../../components/ui/Spinner";
 import { CarnetEntryModal } from "../../components/carnet/CarnetEntryModal";
 import { CustomerFormModal } from "../../components/carnet/CustomerFormModal";
 import { TransactionHistory } from "../../components/carnet/TransactionHistory";
-import type { CarnetCustomer, CarnetTransaction } from "../../lib/types";
+import type { CarnetCustomer } from "../../lib/types";
 import { fmtMoneyShort, waLink } from "../../lib/format";
 import { t } from "../../i18n";
 
@@ -29,8 +29,8 @@ export default function CustomerDetailPage() {
   const { showToast } = useToast();
 
   const [customer, setCustomer] = useState<CarnetCustomer | null>(null);
-  const [transactions, setTransactions] = useState<CarnetTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [historyKey, setHistoryKey] = useState(0);
   const [entryOpen, setEntryOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
@@ -39,20 +39,11 @@ export default function CustomerDetailPage() {
   const load = useCallback(async () => {
     if (!customerId) return;
     setLoading(true);
+    setHistoryKey((k) => k + 1);
     try {
-      const [custRes, txRes] = await Promise.all([
-        supabase.from("carnet_customers").select("*").eq("id", customerId).maybeSingle(),
-        supabase
-          .from("carnet_transactions")
-          .select("*")
-          .eq("customer_id", customerId)
-          .order("created_at", { ascending: false })
-          .limit(100),
-      ]);
+      const custRes = await supabase.from("carnet_customers").select("*").eq("id", customerId).maybeSingle();
       if (custRes.error) throw new Error(custRes.error.message);
-      if (txRes.error) throw new Error(txRes.error.message);
       setCustomer(custRes.data);
-      setTransactions(txRes.data ?? []);
     } catch (err) {
       showToast(err instanceof Error ? err.message : t("common.error"), "error");
     } finally {
@@ -184,7 +175,7 @@ export default function CustomerDetailPage() {
         </dl>
       </Card>
 
-      <TransactionHistory transactions={transactions} />
+      <TransactionHistory customerId={customer.id} reloadKey={historyKey} />
 
       <CarnetEntryModal
         open={entryOpen}
