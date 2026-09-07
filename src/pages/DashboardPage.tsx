@@ -14,6 +14,7 @@ import { ReceiveStockModal } from "../components/inventory/ReceiveStockModal";
 import { CarnetEntryModal } from "../components/carnet/CarnetEntryModal";
 import { MovementFeed } from "../components/dashboard/MovementFeed";
 import { CarnetFeed } from "../components/dashboard/CarnetFeed";
+import { EmptyStoreCard } from "../components/dashboard/EmptyStoreCard";
 import { fetchLowStockProducts } from "../lib/api";
 import type {
   CarnetTransactionWithCustomer,
@@ -113,6 +114,10 @@ export default function DashboardPage() {
             {t("common.retry")}
           </Button>
         </div>
+      )}
+
+      {!loading && !loadError && stats?.product_count === 0 && (
+        <EmptyStoreCard onAddProduct={() => setAddProductOpen(true)} onLoaded={loadAll} />
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

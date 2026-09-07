@@ -70,12 +70,12 @@ Each sprint ships, commits (conventional commits), and passes its gate before th
 - Gate: vitest 58+ green, SQL suite 19/19, reports still export CSV correctly. **PASSED 7 Sep 2026 (partial): vitest 58/58, all data queries bounded (manual audit: every .select has range/limit or is single-row; caps added to categories 500, suppliers 500, carnet outstanding 2000), movements summary now computed server-side by new RPC 00010. SQL suite deferred until the new Supabase project exists (owner deleted the old one; run all-in-one + tests/rls_rpc_tests.sql + seed-demo.sql at setup).**
 
 ### Sprint 2 - Real-life flows (1-2 days)
-- [ ] DECISION (do first): minimal "Vente" quick action - product + qty (+ optional note) calling `adjust_stock('sale')`. No cart, no totals, no payments (stays out of POS). If No: remove 'sale' from UI constants and document. (F11)
-- [ ] Category management: rename + archive modal from the Products filter (F10)
-- [ ] Expiry: "expire sous 30 jours" filter in Reports + badge on ProductSummary (F12)
-- [ ] Onboarding: "Charger des donnees d'exemple" button on empty dashboard (SQL function seeded through the RPCs, respects invariants) (adoption)
-- [ ] Settings: replace `window.location.reload()` with context refresh (F16)
-- Gate: new forms tested (fake supabase pattern), SQL suite extended if schema/functions touched.
+- [x] DECISION (do first): minimal "Vente" quick action - product + qty (+ optional note) calling `adjust_stock('sale')`. No cart, no totals, no payments (stays out of POS). If No: remove 'sale' from UI constants and document. (F11)
+- [x] Category management: rename + archive modal from the Products filter (F10)
+- [x] Expiry: "expire sous 30 jours" filter in Reports + badge on ProductSummary (F12)
+- [x] Onboarding: "Charger des donnees d'exemple" button on empty dashboard (SQL function seeded through the RPCs, respects invariants) (adoption)
+- [x] Settings: replace `window.location.reload()` with context refresh (F16)
+- Gate: new forms tested (fake supabase pattern), SQL suite extended if schema/functions touched. **PASSED 7 Sep 2026 (partial): vitest 61/61 (SellStockForm RPC contract, sampleData helper, previous suites), sale flow implemented as minimal single-product decrement via adjust_stock('sale') under a new Vendre tab, Expiry report tab + ProductSummary badge, CategoryManageModal (rename/archive), EmptyStoreCard onboarding CTA (needs migration 00011 product_count), Settings context refresh instead of reload. SQL suite deferred until the new Supabase project exists.**
 
 ### Sprint 3 - Fast and accessible (1 day)
 - [ ] Route code splitting: React.lazy per page + Suspense; manualChunks vendor/supabase (F19); verify first-load gzip drops meaningfully

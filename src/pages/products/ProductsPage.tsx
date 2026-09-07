@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Package, Plus, Search } from "lucide-react";
+import { Package, Plus, Search, Tags } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -11,6 +11,7 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { Pagination } from "../../components/ui/Pagination";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { ProductFormModal } from "../../components/products/ProductFormModal";
+import { CategoryManageModal } from "../../components/products/CategoryManageModal";
 import { ProductFilters, type ProductFilterState } from "../../components/products/ProductFilters";
 import { ProductsTable } from "../../components/products/ProductsTable";
 import { AdjustStockModal } from "../../components/inventory/AdjustStockModal";
@@ -44,6 +45,7 @@ export default function ProductsPage() {
   const [adjustFor, setAdjustFor] = useState<string | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<ProductOverview | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
     if (!store) return;
@@ -138,10 +140,16 @@ export default function ProductsPage() {
         title={t("products.title")}
         description={t("products.subtitle")}
         actions={
-          <Button onClick={() => setAddOpen(true)}>
-            <Plus className="h-4 w-4" />
-            {t("products.add")}
-          </Button>
+          <>
+            <Button variant="secondary" onClick={() => setCategoriesOpen(true)}>
+              <Tags className="h-4 w-4" />
+              {t("products.manageCategories")}
+            </Button>
+            <Button onClick={() => setAddOpen(true)}>
+              <Plus className="h-4 w-4" />
+              {t("products.add")}
+            </Button>
+          </>
         }
       />
 
@@ -193,6 +201,11 @@ export default function ProductsPage() {
       </Card>
 
       <ProductFormModal open={addOpen} onClose={() => setAddOpen(false)} onSaved={() => loadRows()} />
+      <CategoryManageModal
+        open={categoriesOpen}
+        onClose={() => setCategoriesOpen(false)}
+        onChanged={() => loadRows()}
+      />
       <ProductFormModal
         open={!!editProduct}
         onClose={() => setEditProduct(null)}

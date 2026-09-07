@@ -2,6 +2,7 @@ import { Badge, stockStatusTone } from "../ui/Badge";
 import { Card } from "../ui/Card";
 import type { Product } from "../../lib/types";
 import { getStockStatus } from "../../lib/stockStatus";
+import { expiryStatus } from "../../lib/expiry";
 import { fmtDate, fmtMoneyShort, fmtQty } from "../../lib/format";
 import { unitShort } from "../../lib/constants";
 import { t } from "../../i18n";
@@ -14,6 +15,7 @@ interface ProductSummaryProps {
 export function ProductSummary({ product, categoryName }: ProductSummaryProps) {
   const stock = Number(product.current_stock);
   const status = getStockStatus(stock, product.low_stock_threshold);
+  const expiry = expiryStatus(product.expiry_date);
 
   const statusLabel =
     status === "out"
@@ -34,9 +36,16 @@ export function ProductSummary({ product, categoryName }: ProductSummaryProps) {
             {unitShort(product.unit)}
           </span>
         </p>
-        <Badge tone={stockStatusTone(status)} dot>
-          {statusLabel}
-        </Badge>
+        <div className="flex flex-wrap gap-2">
+          <Badge tone={stockStatusTone(status)} dot>
+            {statusLabel}
+          </Badge>
+          {expiry.tone && (
+            <Badge tone={expiry.tone} dot>
+              {expiry.tone === "danger" ? t("reports.expiry.expired") : t("reports.expiry.soon")}
+            </Badge>
+          )}
+        </div>
         <dl className="mt-4 w-full space-y-2 border-t border-neutral-100 pt-4 text-sm">
           <div className="flex justify-between gap-2">
             <dt className="text-neutral-500">{t("products.table.category")}</dt>

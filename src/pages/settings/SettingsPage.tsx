@@ -12,7 +12,7 @@ import { t } from "../../i18n";
 import { setLanguage } from "../../i18n";
 
 export default function SettingsPage() {
-  const { store, profile, refreshStore } = useAuth();
+  const { store, profile, refreshStore, refreshProfile } = useAuth();
   const { showToast } = useToast();
 
   const [storeName, setStoreName] = useState("");
@@ -77,7 +77,7 @@ export default function SettingsPage() {
         .eq("id", profile.id);
       if (res.error) throw new Error(res.error.message);
       showToast(t("toast.profileUpdated"));
-      window.location.reload();
+      await refreshProfile();
     } catch (err) {
       showToast(err instanceof Error ? err.message : t("common.error"), "error");
     } finally {

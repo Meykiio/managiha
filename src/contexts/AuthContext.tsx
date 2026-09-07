@@ -31,6 +31,7 @@ interface AuthContextValue {
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   refreshStore: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -131,6 +132,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadUserData({ cancelled: false }, true);
   }, [userId, loadUserData]);
 
+  const refreshProfile = useCallback(async () => {
+    if (!userId) return;
+    const res = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+    setProfile(res.data ?? null);
+  }, [userId]);
+
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(mapAuthError(error.message));
@@ -181,6 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetPassword,
     updatePassword,
     refreshStore,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

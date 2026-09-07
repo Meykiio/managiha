@@ -3,10 +3,11 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { Tabs } from "../../components/ui/Tabs";
 import { ReceiveStockForm } from "../../components/inventory/ReceiveStockForm";
 import { AdjustStockForm } from "../../components/inventory/AdjustStockForm";
+import { SellStockForm } from "../../components/inventory/SellStockForm";
 import HistoryTab from "./HistoryTab";
 import { t } from "../../i18n";
 
-type TabKey = "receive" | "adjust" | "history";
+type TabKey = "receive" | "sell" | "adjust" | "history";
 
 export default function InventoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,6 +23,7 @@ export default function InventoryPage() {
       <Tabs<TabKey>
         tabs={[
           { key: "receive", label: t("inventory.tab.receive") },
+          { key: "sell", label: t("inventory.tab.sell") },
           { key: "adjust", label: t("inventory.tab.adjust") },
           { key: "history", label: t("inventory.tab.history") },
         ]}
@@ -33,6 +35,11 @@ export default function InventoryPage() {
         {tab === "receive" && (
           <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <ReceiveStockForm />
+          </div>
+        )}
+        {tab === "sell" && (
+          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+            <SellStockForm />
           </div>
         )}
         {tab === "adjust" && (

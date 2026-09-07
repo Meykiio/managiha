@@ -135,4 +135,5 @@ export interface DashboardStats {
   low_count: number;
   out_count: number;
   carnet_total: number;
+  product_count: number;
 }

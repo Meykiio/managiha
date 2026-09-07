@@ -55,4 +55,4 @@ npm test           # vitest run (58 tests)
 
 ## Out of scope (never add without being asked)
 
-POS/checkout, fiscal invoicing, staff roles, multi-store, CSV import, offline sync, billing UI, decorative charts, Arabic as a *functional* language (structure only), product-image upload (UI pending), and any hard-delete affordance.
+POS/checkout/cart/payments (a minimal single-product `sale` decrement via `adjust_stock` IS in scope: Inventory > Vendre tab), fiscal invoicing, staff roles, multi-store, CSV import, offline sync, billing UI, decorative charts, Arabic as a *functional* language (structure only), product-image upload (UI pending), and any hard-delete affordance.
