@@ -55,6 +55,11 @@ export const fr = {
   "common.to": "Au",
   "common.apply": "Appliquer",
 
+  "errorBoundary.title": "Une erreur inattendue est survenue",
+  "errorBoundary.body": "L'application a rencontré un problème. Réessayez ou retournez au tableau de bord.",
+  "errorBoundary.backHome": "Retour au tableau de bord",
+  "errorBoundary.reload": "Recharger la page",
+
   "toast.saved": "Modifications enregistrées",
   "toast.productAdded": "Produit ajouté",
   "toast.productUpdated": "Produit mis à jour",

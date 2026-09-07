@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [movements, setMovements] = useState<StockMovementWithProduct[]>([]);
   const [transactions, setTransactions] = useState<CarnetTransactionWithCustomer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [addProductOpen, setAddProductOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [receiveFor, setReceiveFor] = useState<string | null>(null);
@@ -45,6 +46,7 @@ export default function DashboardPage() {
   const loadAll = useCallback(async () => {
     if (!store) return;
     setLoading(true);
+    setLoadError(null);
     try {
       const [statsRes, movRes, txRes] = await Promise.all([
         supabase.rpc("get_dashboard_stats"),
@@ -68,8 +70,8 @@ export default function DashboardPage() {
       setLowStock(await fetchLowStockProducts(store.id, 10));
       setMovements((movRes.data ?? []) as unknown as StockMovementWithProduct[]);
       setTransactions((txRes.data ?? []) as unknown as CarnetTransactionWithCustomer[]);
-    } catch {
-      setStats({ stock_value: 0, low_count: 0, out_count: 0, carnet_total: 0 });
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -97,6 +99,21 @@ export default function DashboardPage() {
           </>
         }
       />
+
+      {loadError && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+            <div>
+              <p className="text-sm font-semibold text-red-700">{t("dash.error.title")}</p>
+              <p className="break-words text-xs text-red-600">{loadError}</p>
+            </div>
+          </div>
+          <Button variant="secondary" onClick={loadAll} loading={loading}>
+            {t("common.retry")}
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

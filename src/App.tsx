@@ -20,6 +20,7 @@ import SettingsPage from "./pages/settings/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { isSupabaseConfigured } from "./lib/supabaseClient";
 import { t } from "./i18n";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
 
 function ConfigErrorScreen() {
   return (
@@ -102,10 +103,11 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 export default function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   return (
-    <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <Routes>
             <Route
               path="/login"
               element={
@@ -153,5 +155,6 @@ export default function App() {
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>
+    </ErrorBoundary>
   );
 }
