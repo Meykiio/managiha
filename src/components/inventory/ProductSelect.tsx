@@ -6,6 +6,8 @@ import { unitShort } from "../../lib/constants";
 import { fetchActiveProductsLite, type ProductLite } from "../../lib/api";
 import { stockStatusTone, Badge } from "../ui/Badge";
 import { Spinner } from "../ui/Spinner";
+import { useComboKeyboard } from "../../hooks/useComboKeyboard";
+import { t } from "../../i18n";
 import type { StockStatus } from "../../lib/types";
 
 const STATUS_LABEL: Record<StockStatus, string> = {
@@ -37,7 +39,7 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
         if (!cancelled) setProducts(rows);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Erreur");
+        if (!cancelled) setError(err instanceof Error ? err.message : t("productSelect.error"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -70,6 +72,19 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
       .slice(0, 30);
   }, [products, search]);
 
+  const { activeIndex, setActiveIndex, listRef, onKeyDown } = useComboKeyboard({
+    itemCount: filtered.length,
+    onSelect: (index) => {
+      const product = filtered[index];
+      if (product) {
+        onChange(product.id);
+        setOpen(false);
+        setSearch("");
+      }
+    },
+    onClose: () => setOpen(false),
+  });
+
   return (
     <div className="relative w-full" ref={rootRef}>
       {label && (
@@ -88,19 +103,19 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
         <span className="truncate">
           {loading ? (
             <span className="flex items-center gap-2 text-neutral-400">
-              <Spinner className="h-4 w-4" /> Chargement…
+              <Spinner className="h-4 w-4" /> {t("common.loading")}
             </span>
           ) : selected ? (
             selected.name
           ) : (
-            <span className="text-neutral-400">Rechercher un produit…</span>
+            <span className="text-neutral-400">{t("productSelect.search")}</span>
           )}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
       </button>
       {selected && !open && (
         <p className="mt-1 text-xs text-neutral-500">
-          Stock actuel :{" "}
+          {t("productSelect.stockCurrent")}{" "}
           <span className="font-semibold tnum">{fmtQty(selected.current_stock)}</span>{" "}
           {unitShort(selected.unit)} ·{" "}
           <Badge tone={stockStatusTone(selected.stock_status)} dot>
@@ -117,17 +132,18 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un produit…"
+                onKeyDown={onKeyDown}
+                placeholder={t("productSelect.search")}
                 className="h-10 w-full rounded-lg border border-neutral-200 ps-9 pe-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
               />
             </div>
           </div>
-          <ul role="listbox" className="max-h-56 overflow-y-auto p-1.5">
+          <ul role="listbox" ref={listRef} className="max-h-56 overflow-y-auto p-1.5">
             {error && <li className="px-3 py-2 text-sm text-red-600">{error}</li>}
             {!loading && filtered.length === 0 && !error && (
-              <li className="px-3 py-2 text-sm text-neutral-500">Aucun produit trouvé</li>
+              <li className="px-3 py-2 text-sm text-neutral-500">{t("productSelect.empty")}</li>
             )}
-            {filtered.map((p) => (
+            {filtered.map((p, index) => (
               <li key={p.id}>
                 <button
                   type="button"
@@ -136,7 +152,11 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
                     setOpen(false);
                     setSearch("");
                   }}
-                  className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-sm hover:bg-neutral-50"
+                  onMouseEnter={() => setActiveIndex(index)}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-sm hover:bg-neutral-50",
+                    index === activeIndex && "bg-primary-50"
+                  )}
                 >
                   <span className="truncate font-medium text-neutral-800">{p.name}</span>
                   <span className="tnum shrink-0 text-xs text-neutral-500">

@@ -3,6 +3,8 @@ import { ChevronDown, Search } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { searchCarnetCustomers } from "../../lib/api";
 import { fmtMoney } from "../../lib/format";
+import { useComboKeyboard } from "../../hooks/useComboKeyboard";
+import { t } from "../../i18n";
 import type { CarnetCustomer } from "../../lib/types";
 
 interface CustomerSelectProps {
@@ -38,7 +40,19 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
 
   const selectedName =
     results.find((c) => c.id === value)?.full_name ??
-    (value ? "Client sélectionné" : null);
+    (value ? t("customerSelect.selected") : null);
+
+  const { activeIndex, setActiveIndex, listRef, onKeyDown } = useComboKeyboard({
+    itemCount: results.length,
+    onSelect: (index) => {
+      const customer = results[index];
+      if (customer) {
+        onChange(customer.id);
+        setOpen(false);
+      }
+    },
+    onClose: () => setOpen(false),
+  });
 
   return (
     <div className="relative w-full" ref={rootRef}>
@@ -55,7 +69,7 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
         )}
       >
         <span className="truncate">
-          {selectedName ?? <span className="text-neutral-400">Rechercher un client…</span>}
+          {selectedName ?? <span className="text-neutral-400">{t("customerSelect.search")}</span>}
         </span>
         <ChevronDown className="h-4 w-4 shrink-0 text-neutral-400" />
       </button>
@@ -68,17 +82,18 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
                 autoFocus
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Rechercher un client…"
+                onKeyDown={onKeyDown}
+                placeholder={t("customerSelect.search")}
                 className="h-10 w-full rounded-lg border border-neutral-200 ps-9 pe-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100"
               />
             </div>
           </div>
-          <ul role="listbox" className="max-h-56 overflow-y-auto p-1.5">
+          <ul role="listbox" ref={listRef} className="max-h-56 overflow-y-auto p-1.5">
             {!open && null}
             {results.length === 0 && (
-              <li className="px-3 py-2 text-sm text-neutral-500">Aucun client trouvé</li>
+              <li className="px-3 py-2 text-sm text-neutral-500">{t("customerSelect.empty")}</li>
             )}
-            {results.map((c) => (
+            {results.map((c, index) => (
               <li key={c.id}>
                 <button
                   type="button"
@@ -86,7 +101,11 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
                     onChange(c.id);
                     setOpen(false);
                   }}
-                  className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-sm hover:bg-neutral-50"
+                  onMouseEnter={() => setActiveIndex(index)}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-sm hover:bg-neutral-50",
+                    index === activeIndex && "bg-primary-50"
+                  )}
                 >
                   <span className="truncate font-medium text-neutral-800">{c.full_name}</span>
                   <span className="tnum shrink-0 text-xs text-neutral-500">

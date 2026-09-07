@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
+import { OfflineBanner } from "./OfflineBanner";
 import { cn } from "../../lib/utils";
 import { SIDEBAR_COLLAPSED_KEY } from "../../lib/constants";
 
@@ -38,6 +39,7 @@ export function AppLayout() {
         )}
       >
         <Topbar onOpenMobileNav={() => setMobileOpen(true)} />
+        <OfflineBanner />
         <main className="mx-auto w-full max-w-6xl flex-1 p-4 lg:p-8">
           <Outlet />
         </main>

@@ -54,6 +54,7 @@ export const fr = {
   "common.from": "Du",
   "common.to": "Au",
   "common.apply": "Appliquer",
+  "offline.banner": "Connexion perdue. Vérifiez votre réseau, les modifications ne seront pas enregistrées.",
 
   "errorBoundary.title": "Une erreur inattendue est survenue",
   "errorBoundary.body": "L'application a rencontré un problème. Réessayez ou retournez au tableau de bord.",
@@ -117,4 +118,40 @@ export const fr = {
   "auth.reset.invalidLinkBody":
     "Ce lien de réinitialisation n'est plus valide. Demandez un nouveau lien.",
   "auth.reset.mismatch": "Les mots de passe ne correspondent pas",
-  "auth.backToLogin": "Retour à la connexion",} as const;
+  "auth.backToLogin": "Retour à la connexion",
+
+  "productSelect.loading": "Chargement…",
+  "productSelect.search": "Rechercher un produit…",
+  "productSelect.stockCurrent": "Stock actuel :",
+  "productSelect.empty": "Aucun produit trouvé",
+  "productSelect.error": "Erreur",
+
+  "customerSelect.search": "Rechercher un client…",
+  "customerSelect.selected": "Client sélectionné",
+  "customerSelect.empty": "Aucun client trouvé",
+
+  "categoryCombo.label": "Catégorie",
+  "categoryCombo.placeholder": "Choisir ou créer une catégorie",
+  "categoryCombo.empty": "Tapez un nom pour créer une catégorie",
+
+  "validate.nameRequired": "Le nom est obligatoire",
+  "validate.selectProduct": "Sélectionnez un produit",
+  "validate.selectCustomer": "Sélectionnez un client",
+  "validate.motiveRequired": "Le motif est obligatoire",
+  "validate.quantityPositive": "Entrez une quantité supérieure à 0",
+  "validate.quantityNonNegative": "La quantité constatée ne peut pas être négative",
+  "validate.noStockChange": "Aucun changement de stock",
+  "validate.amountPositive": "Entrez un montant supérieur à 0",
+  "validate.amountInvalid": "Montant invalide",
+
+  "inventory.adjust.title": "Ajuster le stock",
+  "inventory.adjust.currentStock": "Stock actuel :",
+  "inventory.adjust.noChange": "Aucun changement de stock à enregistrer.",
+  "inventory.receive.title": "Réceptionner du stock",
+  "inventory.form.initialStockHint": "Le stock initial sera enregistré comme mouvement « Stock initial ».",
+  "inventory.history.count": "{count} mouvement(s)",
+
+  "products.archive.restoreHint": "{name} réapparaîtra dans le catalogue actif.",
+  "carnet.customer.restoreHint": "{name} réapparaîtra dans le carnet.",
+  "settings.language.fr": "Français",
+  "auth.signup.storePlaceholder": "Ex : Épicerie El Baraka",} as const;

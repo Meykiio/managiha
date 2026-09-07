@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -8,19 +8,20 @@ import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
-import DashboardPage from "./pages/DashboardPage";
-import ProductsPage from "./pages/products/ProductsPage";
-import ProductDetailPage from "./pages/products/ProductDetailPage";
-import InventoryPage from "./pages/inventory/InventoryPage";
-import CarnetPage from "./pages/carnet/CarnetPage";
-import CustomerDetailPage from "./pages/carnet/CustomerDetailPage";
-import SuppliersPage from "./pages/suppliers/SuppliersPage";
-import ReportsPage from "./pages/reports/ReportsPage";
-import SettingsPage from "./pages/settings/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { isSupabaseConfigured } from "./lib/supabaseClient";
 import { t } from "./i18n";
 import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const ProductsPage = lazy(() => import("./pages/products/ProductsPage"));
+const ProductDetailPage = lazy(() => import("./pages/products/ProductDetailPage"));
+const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
+const CarnetPage = lazy(() => import("./pages/carnet/CarnetPage"));
+const CustomerDetailPage = lazy(() => import("./pages/carnet/CustomerDetailPage"));
+const SuppliersPage = lazy(() => import("./pages/suppliers/SuppliersPage"));
+const ReportsPage = lazy(() => import("./pages/reports/ReportsPage"));
+const SettingsPage = lazy(() => import("./pages/settings/SettingsPage"));
 
 function ConfigErrorScreen() {
   return (
@@ -100,6 +101,10 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<FullScreenSpinner />}>{children}</Suspense>;
+}
+
 export default function App() {
   if (!isSupabaseConfigured) return <ConfigErrorScreen />;
   return (
@@ -140,15 +145,15 @@ export default function App() {
                 </RequireAuth>
               }
             >
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/:productId" element={<ProductDetailPage />} />
-              <Route path="/inventory" element={<InventoryPage />} />
-              <Route path="/carnet" element={<CarnetPage />} />
-              <Route path="/carnet/:customerId" element={<CustomerDetailPage />} />
-              <Route path="/suppliers" element={<SuppliersPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/" element={<LazyPage><DashboardPage /></LazyPage>} />
+              <Route path="/products" element={<LazyPage><ProductsPage /></LazyPage>} />
+              <Route path="/products/:productId" element={<LazyPage><ProductDetailPage /></LazyPage>} />
+              <Route path="/inventory" element={<LazyPage><InventoryPage /></LazyPage>} />
+              <Route path="/carnet" element={<LazyPage><CarnetPage /></LazyPage>} />
+              <Route path="/carnet/:customerId" element={<LazyPage><CustomerDetailPage /></LazyPage>} />
+              <Route path="/suppliers" element={<LazyPage><SuppliersPage /></LazyPage>} />
+              <Route path="/reports" element={<LazyPage><ReportsPage /></LazyPage>} />
+              <Route path="/settings" element={<LazyPage><SettingsPage /></LazyPage>} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

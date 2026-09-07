@@ -1,7 +1,8 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { t } from "../../i18n";
 
 interface ModalProps {
   open: boolean;
@@ -18,17 +19,53 @@ const sizes = {
   xl: "max-w-4xl",
 };
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+
+    const dialog = dialogRef.current;
+    const focusables = dialog?.querySelectorAll<HTMLElement>(FOCUSABLE);
+    const first = focusables?.[0];
+    (first ?? dialog)?.focus();
+
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !dialog) return;
+      const items = Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (el) => el.offsetParent !== null
+      );
+      if (items.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const firstItem = items[0];
+      const lastItem = items[items.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && (active === firstItem || active === dialog)) {
+        e.preventDefault();
+        lastItem.focus();
+      } else if (!e.shiftKey && active === lastItem) {
+        e.preventDefault();
+        firstItem.focus();
+      }
     };
     document.addEventListener("keydown", handler);
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", handler);
       document.body.style.overflow = "";
+      previousFocusRef.current?.focus();
     };
   }, [open, onClose]);
 
@@ -43,11 +80,13 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
       />
       <div className="flex min-h-full items-center justify-center p-4">
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label={title}
+          tabIndex={-1}
           className={cn(
-            "animate-scale-in relative w-full rounded-xl bg-white shadow-popover",
+            "animate-scale-in relative w-full rounded-xl bg-white shadow-popover outline-none",
             sizes[size]
           )}
         >
@@ -56,7 +95,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
             <button
               type="button"
               onClick={onClose}
-              aria-label="Fermer"
+              aria-label={t("common.close")}
               className="-me-2 flex h-11 w-11 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
             >
               <X className="h-5 w-5" />
