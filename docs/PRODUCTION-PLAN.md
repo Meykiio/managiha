@@ -55,12 +55,12 @@
 Each sprint ships, commits (conventional commits), and passes its gate before the next starts. UI stays simple: no new nav items except Privacy in the auth footer.
 
 ### Sprint 0 - Unbreak the deployed app (half day)
-- [ ] `vercel.json` with SPA rewrite `{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}`; redeploy; verify `/carnet`, a product deep link, and `/reset-password` on production
-- [ ] Supabase Auth URL config: add `https://managiha.vercel.app/reset-password` to redirect allow-list (F02)
-- [ ] React `ErrorBoundary` at root with FR fallback (reload button), report to console now, Sentry in Sprint 4
-- [ ] Dashboard: on fetch failure show an explicit error state with Retry (reuse StoreMissing pattern), never fake zeros (F04)
-- [ ] GitHub Actions CI: on push/PR run `npm ci && npm run typecheck && npm test` (F06)
-- Gate: deep links work on prod, boundary renders in a forced test, CI green on GitHub.
+- [x] `vercel.json` with SPA rewrite `{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}`; redeploy; verify `/carnet`, a product deep link, and `/reset-password` on production
+- [x] Supabase Auth URL config: add `https://managiha.vercel.app/reset-password` to redirect allow-list (F02)
+- [x] React `ErrorBoundary` at root with FR fallback (reload button), report to console now, Sentry in Sprint 4
+- [x] Dashboard: on fetch failure show an explicit error state with Retry (reuse StoreMissing pattern), never fake zeros (F04)
+- [x] GitHub Actions CI: on push/PR run `npm ci && npm run typecheck && npm test` (F06)
+- Gate: deep links work on prod, boundary renders in a forced test, CI green on GitHub. **PASSED 7 Sep 2026: /carnet, /reset-password, /products/x all 200 on production; CI run 34141265286 green in 38s.**
 
 ### Sprint 1 - Truth in the numbers (1 day)
 - [ ] MovementsReport: server-side pagination with PAGE_SIZE + range cap (F05)
