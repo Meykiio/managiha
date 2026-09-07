@@ -154,4 +154,13 @@ export const fr = {
   "products.archive.restoreHint": "{name} réapparaîtra dans le catalogue actif.",
   "carnet.customer.restoreHint": "{name} réapparaîtra dans le carnet.",
   "settings.language.fr": "Français",
-  "auth.signup.storePlaceholder": "Ex : Épicerie El Baraka",} as const;
+  "auth.signup.storePlaceholder": "Ex : Épicerie El Baraka",
+
+  "imageUpload.add": "Ajouter une photo",
+  "imageUpload.uploading": "Envoi…",
+  "imageUpload.success": "Image enregistrée",
+  "imageUpload.removed": "Image supprimée",
+  "imageUpload.tooLarge": "L'image ne doit pas dépasser 20 Mo",
+  "imageUpload.invalidType": "Format non supporté (PNG, JPEG ou WebP uniquement)",
+  "imageUpload.alt": "Photo du produit",
+  "imageUpload.remove": "Supprimer l'image",} as const;

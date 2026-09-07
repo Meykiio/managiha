@@ -76,6 +76,7 @@
   "productForm.sku": "SKU / Référence",
   "productForm.expiry": "Date d'expiration",
   "productForm.supplier": "Fournisseur",
+  "productForm.image": "Photo du produit",
   "productForm.basicSection": "Informations générales",
   "productForm.pricingSection": "Prix & stock",
   "productForm.detailsSection": "Détails supplémentaires",
@@ -255,6 +256,11 @@
   "settings.plan.statusValue": "Actif",
   "settings.plan.note":
     "La facturation n'est pas disponible pendant la bêta. Votre compte reste actif sans limite.",
+
+  "settings.links.title": "Liens utiles",
+  "settings.links.privacy": "Politique de confidentialité",
+  "settings.links.sourceCode": "Code source sur GitHub",
+  "settings.links.openSource": "Logiciel open-source sous licence MIT",
 
   "notFound.title": "Page introuvable",
   "notFound.body": "La page que vous cherchez n'existe pas ou a été déplacée.",

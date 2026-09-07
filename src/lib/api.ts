@@ -142,3 +142,39 @@ export async function searchCarnetCustomers(
   if (error) throw new Error(error.message);
   return data ?? [];
 }
+
+const BUCKET = "product-images";
+
+export async function uploadProductImage(
+  storeId: string,
+  productId: string,
+  file: File
+): Promise<string> {
+  const path = `${storeId}/${productId}/${file.name}`;
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) throw new Error(error.message);
+  return path;
+}
+
+export async function deleteProductImage(storeId: string, productId: string): Promise<void> {
+  const { data: files } = await supabase.storage
+    .from(BUCKET)
+    .list(`${storeId}/${productId}`);
+  if (!files || files.length === 0) return;
+  const paths = files.map((f) => `${storeId}/${productId}/${f.name}`);
+  const { error } = await supabase.storage.from(BUCKET).remove(paths);
+  if (error) throw new Error(error.message);
+}
+
+export async function getProductImageUrl(storeId: string, productId: string): Promise<string | null> {
+  const { data: files } = await supabase.storage
+    .from(BUCKET)
+    .list(`${storeId}/${productId}`);
+  if (!files || files.length === 0) return null;
+  const { data } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrl(`${storeId}/${productId}/${files[0].name}`, 3600);
+  return data?.signedUrl ?? null;
+}

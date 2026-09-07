@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { CategoryCombo } from "./CategoryCombo";
+import { ProductImageUpload } from "./ProductImageUpload";
 import { fetchSuppliers } from "../../lib/api";
 import { UNITS } from "../../lib/constants";
 import type { Supplier, Unit } from "../../lib/types";
@@ -19,6 +20,7 @@ export interface ProductFormValues {
   sku: string;
   expiryDate: string;
   supplierId: string;
+  imagePath: string | null;
 }
 
 export const emptyProductForm: ProductFormValues = {
@@ -33,10 +35,12 @@ export const emptyProductForm: ProductFormValues = {
   sku: "",
   expiryDate: "",
   supplierId: "",
+  imagePath: null,
 };
 
 interface ProductFormFieldsProps {
   storeId: string;
+  productId?: string;
   values: ProductFormValues;
   onChange: (values: ProductFormValues) => void;
   errors: Partial<Record<keyof ProductFormValues, string>>;
@@ -45,6 +49,7 @@ interface ProductFormFieldsProps {
 
 export function ProductFormFields({
   storeId,
+  productId,
   values,
   onChange,
   errors,
@@ -63,6 +68,19 @@ export function ProductFormFields({
 
   return (
     <div className="space-y-5">
+      {isEdit && productId && (
+        <div>
+          <span className="mb-1.5 block text-sm font-medium text-neutral-700">
+            {t("productForm.image")}
+          </span>
+          <ProductImageUpload
+            storeId={storeId}
+            productId={productId}
+            imagePath={values.imagePath}
+            onImageChange={(path) => set("imagePath", path)}
+          />
+        </div>
+      )}
       <Input
         label={t("productForm.name")}
         required

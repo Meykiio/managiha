@@ -8,6 +8,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { isSupabaseConfigured } from "./lib/supabaseClient";
 import { t } from "./i18n";
@@ -138,6 +139,7 @@ export default function App() {
               }
             />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route
               element={
                 <RequireAuth>

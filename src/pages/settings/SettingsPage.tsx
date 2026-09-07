@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Building2, CreditCard, UserRound } from "lucide-react";
+import { Building2, CreditCard, ExternalLink, Shield, UserRound } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
@@ -176,6 +177,35 @@ export default function SettingsPage() {
         <p className="mt-4 flex items-start gap-2 rounded-lg bg-neutral-50 px-3.5 py-3 text-xs leading-relaxed text-neutral-500">
           <CreditCard className="mt-0.5 h-4 w-4 shrink-0" />
           {t("settings.plan.note")}
+        </p>
+      </Card>
+
+      <Card title={t("settings.links.title")} className="max-w-2xl">
+        <ul className="space-y-3 text-sm">
+          <li>
+            <Link
+              to="/privacy"
+              className="flex items-center gap-2 text-neutral-700 hover:text-primary-600"
+            >
+              <Shield className="h-4 w-4 text-neutral-400" />
+              {t("settings.links.privacy")}
+              <ExternalLink className="h-3 w-3 text-neutral-400" />
+            </Link>
+          </li>
+          <li>
+            <a
+              href="https://github.com/Meykiio/managiha"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-neutral-700 hover:text-primary-600"
+            >
+              <ExternalLink className="h-4 w-4 text-neutral-400" />
+              {t("settings.links.sourceCode")}
+            </a>
+          </li>
+        </ul>
+        <p className="mt-4 text-xs text-neutral-400">
+          Managiha v1.0.0 — {t("settings.links.openSource")}
         </p>
       </Card>
     </div>

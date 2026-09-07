@@ -1,11 +1,37 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Archive, ArchiveRestore, Eye, Pencil, Scale } from "lucide-react";
+import { Archive, ArchiveRestore, Eye, Image, Pencil, Scale } from "lucide-react";
 import { Badge, stockStatusTone, type BadgeTone } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import type { Category, ProductOverview, StockStatus } from "../../lib/types";
 import { fmtMoneyShort, fmtQty } from "../../lib/format";
 import { unitShort } from "../../lib/constants";
 import { t } from "../../i18n";
+import { getProductImageUrl } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
+
+function ProductThumbnail({ productId, name }: { productId: string; name: string }) {
+  const { store } = useAuth();
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!store) return;
+    let cancelled = false;
+    getProductImageUrl(store.id, productId)
+      .then((u) => { if (!cancelled) setUrl(u); })
+      .catch(() => { if (!cancelled) setUrl(null); });
+    return () => { cancelled = true; };
+  }, [store, productId]);
+
+  if (!url) {
+    return (
+      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400">
+        <Image className="h-5 w-5" />
+      </span>
+    );
+  }
+  return <img src={url} alt={name} className="h-10 w-10 rounded-lg object-cover" />;
+}
 
 const STATUS_TONE: Record<StockStatus, BadgeTone> = {
   healthy: "success",
@@ -43,7 +69,7 @@ export function ProductsTable({
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-neutral-200 bg-neutral-50 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            <th className="px-5 py-3 text-start">{t("products.table.name")}</th>
+            <th className="px-5 py-3 text-start" colSpan={2}>{t("products.table.name")}</th>
             <th className="px-3 py-3 text-start">{t("products.table.stock")}</th>
             <th className="px-3 py-3 text-start">{t("products.table.sellPrice")}</th>
             <th className="px-3 py-3 text-start hidden md:table-cell">{t("products.table.category")}</th>
@@ -53,6 +79,9 @@ export function ProductsTable({
         <tbody className="divide-y divide-neutral-100">
           {rows.map((p) => (
             <tr key={p.id} className="hover:bg-neutral-50/60">
+              <td className="px-5 py-3.5">
+                <ProductThumbnail productId={p.id} name={p.name} />
+              </td>
               <td className="max-w-[16rem] px-5 py-3.5">
                 <Link
                   to={`/products/${p.id}`}

@@ -32,10 +32,17 @@ export default function LoginPage() {
     <AuthShell
       footer={
         <>
-          {t("auth.login.noAccount")}{" "}
-          <Link to="/signup" className="font-semibold text-primary-600 hover:text-primary-700">
-            {t("auth.login.createAccount")}
-          </Link>
+          <p>
+            {t("auth.login.noAccount")}{" "}
+            <Link to="/signup" className="font-semibold text-primary-600 hover:text-primary-700">
+              {t("auth.login.createAccount")}
+            </Link>
+          </p>
+          <p className="mt-2">
+            <Link to="/privacy" className="text-xs text-neutral-400 hover:text-neutral-600">
+              Politique de confidentialité
+            </Link>
+          </p>
         </>
       }
     >

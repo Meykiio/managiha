@@ -35,6 +35,7 @@ function toFormValues(product: Product | null | undefined): ProductFormValues {
     sku: product.sku ?? "",
     expiryDate: product.expiry_date ?? "",
     supplierId: product.supplier_id ?? "",
+    imagePath: product.image_path ?? null,
   };
 }
 
@@ -76,6 +77,7 @@ export function ProductFormModal({ open, onClose, product, onSaved }: ProductFor
         barcode: values.barcode.trim() || null,
         sku: values.sku.trim() || null,
         expiry_date: values.expiryDate || null,
+        image_path: isEdit ? values.imagePath : null,
       };
 
       let productId: string;
@@ -126,6 +128,7 @@ export function ProductFormModal({ open, onClose, product, onSaved }: ProductFor
       <form onSubmit={handleSubmit} className="pb-3">
         <ProductFormFields
           storeId={store.id}
+          productId={product?.id}
           values={values}
           onChange={setValues}
           errors={errors}

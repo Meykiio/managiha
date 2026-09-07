@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { Image } from "lucide-react";
 import { Badge, stockStatusTone } from "../ui/Badge";
 import { Card } from "../ui/Card";
 import type { Product } from "../../lib/types";
@@ -6,6 +8,8 @@ import { expiryStatus } from "../../lib/expiry";
 import { fmtDate, fmtMoneyShort, fmtQty } from "../../lib/format";
 import { unitShort } from "../../lib/constants";
 import { t } from "../../i18n";
+import { getProductImageUrl } from "../../lib/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface ProductSummaryProps {
   product: Product;
@@ -13,9 +17,23 @@ interface ProductSummaryProps {
 }
 
 export function ProductSummary({ product, categoryName }: ProductSummaryProps) {
+  const { store } = useAuth();
   const stock = Number(product.current_stock);
   const status = getStockStatus(stock, product.low_stock_threshold);
   const expiry = expiryStatus(product.expiry_date);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!store || !product.image_path) {
+      setImageUrl(null);
+      return;
+    }
+    let cancelled = false;
+    getProductImageUrl(store.id, product.id)
+      .then((url) => { if (!cancelled) setImageUrl(url); })
+      .catch(() => { if (!cancelled) setImageUrl(null); });
+    return () => { cancelled = true; };
+  }, [store, product.id, product.image_path]);
 
   const statusLabel =
     status === "out"
@@ -27,6 +45,17 @@ export function ProductSummary({ product, categoryName }: ProductSummaryProps) {
   return (
     <Card>
       <div className="flex flex-col items-start gap-2">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="mb-2 h-40 w-full rounded-lg object-cover"
+          />
+        ) : (
+          <div className="mb-2 flex h-40 w-full items-center justify-center rounded-lg bg-neutral-100 text-neutral-400">
+            <Image className="h-10 w-10" />
+          </div>
+        )}
         <span className="text-sm font-medium text-neutral-500">
           {t("productDetail.currentStock")}
         </span>

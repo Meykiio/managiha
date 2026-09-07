@@ -58,6 +58,7 @@ export default function ProductDetailPage() {
           sku: p.sku ?? "",
           expiryDate: p.expiry_date ?? "",
           supplierId: p.supplier_id ?? "",
+          imagePath: p.image_path ?? null,
         });
         if (p.category_id) {
           const cat = await supabase
@@ -133,6 +134,7 @@ export default function ProductDetailPage() {
           barcode: values.barcode.trim() || null,
           sku: values.sku.trim() || null,
           expiry_date: values.expiryDate || null,
+          image_path: values.imagePath,
         })
         .eq("id", product.id);
       if (res.error) throw new Error(res.error.message);
@@ -191,6 +193,7 @@ export default function ProductDetailPage() {
           <Card title={t("productDetail.info")}>
             <ProductFormFields
               storeId={store.id}
+              productId={product.id}
               values={values}
               onChange={setValues}
               errors={errors}
