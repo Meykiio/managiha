@@ -11,6 +11,7 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   size?: "md" | "lg" | "xl";
+  busy?: boolean;
 }
 
 const sizes = {
@@ -22,7 +23,7 @@ const sizes = {
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function Modal({ open, onClose, title, children, footer, size = "md" }: ModalProps) {
+export function Modal({ open, onClose, title, children, footer, size = "md", busy = false }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -37,7 +38,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
 
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        if (!busy) onClose();
         return;
       }
       if (e.key !== "Tab" || !dialog) return;
@@ -67,7 +68,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
       document.body.style.overflow = "";
       previousFocusRef.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, busy]);
 
   if (!open) return null;
 
@@ -75,7 +76,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
     <div className="fixed inset-0 z-[60] overflow-y-auto">
       <div
         className="animate-fade-in fixed inset-0 bg-neutral-900/40"
-        onClick={onClose}
+        onClick={busy ? undefined : onClose}
         aria-hidden="true"
       />
       <div className="flex min-h-full items-center justify-center p-4">
@@ -94,9 +95,10 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: M
             <h2 className="text-base font-semibold text-neutral-900">{title}</h2>
             <button
               type="button"
-              onClick={onClose}
+              onClick={busy ? undefined : onClose}
+              disabled={busy}
               aria-label={t("common.close")}
-              className="-me-2 flex h-11 w-11 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+              className="-me-2 flex h-11 w-11 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 disabled:opacity-50"
             >
               <X className="h-5 w-5" />
             </button>

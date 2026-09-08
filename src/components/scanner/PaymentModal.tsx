@@ -34,6 +34,7 @@ export function PaymentModal({
   onSuccess,
 }: PaymentModalProps) {
   const [mode, setMode] = useState<PaymentMode>("cash");
+  const [busy, setBusy] = useState(false);
 
   return (
     <Modal
@@ -41,6 +42,7 @@ export function PaymentModal({
       onClose={onClose}
       title={t("scanner.payment.title")}
       size="md"
+      busy={busy}
     >
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-2">
@@ -94,6 +96,7 @@ export function PaymentModal({
           <CashPayment
             totalAmount={totalAmount}
             items={items}
+            onBusyChange={setBusy}
             onSuccess={(validatedItems, received, change) =>
               onSuccess({
                 items: validatedItems,
@@ -109,6 +112,7 @@ export function PaymentModal({
           <CreditPayment
             totalAmount={totalAmount}
             items={items}
+            onBusyChange={setBusy}
             onSuccess={(validatedItems, customerName) =>
               onSuccess({
                 items: validatedItems,

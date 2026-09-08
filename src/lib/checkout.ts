@@ -80,5 +80,6 @@ export async function validateCheckout(
 }
 
 export function getTotalFromValidated(items: CheckoutItem[]): number {
-  return items.reduce((sum, i) => sum + i.priceAtCheckout * i.quantity, 0);
+  const total = items.reduce((sum, i) => sum + i.priceAtCheckout * i.quantity, 0);
+  return Math.round(total * 100) / 100;
 }

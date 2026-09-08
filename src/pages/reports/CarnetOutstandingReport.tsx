@@ -14,21 +14,39 @@ export default function CarnetOutstandingReport() {
   const { store } = useAuth();
   const [rows, setRows] = useState<CarnetCustomer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!store) return;
-    supabase
-      .from("carnet_customers")
-      .select("*")
-      .eq("store_id", store.id)
-      .is("archived_at", null)
-      .gt("balance", 0)
-      .order("balance", { ascending: false })
-      .limit(2000)
-      .then(({ data }) => {
-        setRows((data ?? []) as CarnetCustomer[]);
-        setLoading(false);
-      });
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    (async () => {
+      try {
+        const { data, error: err } = await supabase
+          .from("carnet_customers")
+          .select("*")
+          .eq("store_id", store.id)
+          .is("archived_at", null)
+          .gt("balance", 0)
+          .order("balance", { ascending: false })
+          .limit(2000);
+        if (cancelled) return;
+        if (err) {
+          setError(err.message);
+          setRows([]);
+        } else {
+          setRows((data ?? []) as CarnetCustomer[]);
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : t("common.error"));
+        setRows([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [store]);
 
   const total = rows.reduce((sum, c) => sum + Number(c.balance), 0);
@@ -47,6 +65,14 @@ export default function CarnetOutstandingReport() {
         {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="h-10 animate-pulse rounded-lg bg-neutral-100" />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+        {error}
       </div>
     );
   }

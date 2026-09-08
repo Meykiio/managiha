@@ -4,7 +4,7 @@ import { Input } from "../ui/Input";
 import { CustomerSelect } from "../carnet/CustomerSelect";
 import { fmtMoney } from "../../lib/format";
 import { useAuth } from "../../contexts/AuthContext";
-import { callAdjustStock, callRecordCarnetTransaction } from "../../lib/api";
+import { callCheckoutSale } from "../../lib/api";
 import { validateCheckout, getTotalFromValidated, type CheckoutItem } from "../../lib/checkout";
 import { supabase } from "../../lib/supabaseClient";
 import { t } from "../../i18n";
@@ -14,9 +14,10 @@ interface CreditPaymentProps {
   totalAmount: number;
   items: ScanCartItem[];
   onSuccess: (validatedItems: CheckoutItem[], customerName: string) => void;
+  onBusyChange?: (busy: boolean) => void;
 }
 
-export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentProps) {
+export function CreditPayment({ totalAmount, items, onSuccess, onBusyChange }: CreditPaymentProps) {
   const { store } = useAuth();
   const [validatedItems, setValidatedItems] = useState<CheckoutItem[] | null>(null);
   const [priceChanged, setPriceChanged] = useState(false);
@@ -58,9 +59,11 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
 
     const nextErrors: typeof errors = {};
     let finalCustomerId = customerId;
+    let finalCustomerName = "";
 
     if (isNewCustomer) {
       if (!newName.trim()) nextErrors.newName = t("validate.nameRequired");
+      finalCustomerName = newName.trim();
     } else if (!finalCustomerId) {
       nextErrors.customer = t("validate.selectCustomer");
     }
@@ -69,6 +72,7 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
     if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitting(true);
+    onBusyChange?.(true);
     setError(null);
 
     try {
@@ -80,34 +84,34 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
             full_name: newName.trim(),
             phone: newPhone.trim() || null,
           })
-          .select("id")
+          .select("id, full_name")
           .single();
         if (inserted.error) throw new Error(inserted.error.message);
         finalCustomerId = inserted.data.id as string;
+        finalCustomerName = inserted.data.full_name as string;
+      } else {
+        // Fetch customer name for receipt
+        const { data: customer } = await supabase
+          .from("carnet_customers")
+          .select("full_name")
+          .eq("id", finalCustomerId!)
+          .single();
+        finalCustomerName = customer?.full_name ?? "";
       }
 
-      for (const item of validatedItems) {
-        await callAdjustStock({
-          productId: item.productId,
-          movementType: "sale",
-          quantity: item.quantity,
-          note: `Vente crédit · ${fmtMoney(item.priceAtCheckout * item.quantity)}`,
-        });
-      }
+      const checkoutItems = validatedItems.map((item) => ({
+        product_id: item.productId,
+        quantity: item.quantity,
+        unit_price: item.priceAtCheckout,
+      }));
+      await callCheckoutSale(checkoutItems, "credit", finalCustomerId!);
 
-      await callRecordCarnetTransaction({
-        customerId: finalCustomerId!,
-        type: "credit",
-        amount: finalTotal,
-        note: `Achat scanner · ${validatedItems.length} produit(s)`,
-      });
-
-      const customerDisplayName = isNewCustomer ? newName.trim() : customerId;
-      onSuccess(validatedItems, customerDisplayName ?? "");
+      onSuccess(validatedItems, finalCustomerName);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("common.error"));
     } finally {
       setSubmitting(false);
+      onBusyChange?.(false);
     }
   };
 

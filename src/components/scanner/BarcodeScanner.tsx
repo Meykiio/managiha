@@ -18,8 +18,11 @@ export function BarcodeScanner({
 }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
+    cancelledRef.current = false;
+
     if (!isActive) {
       scannerRef.current?.stop().catch(() => {});
       scannerRef.current = null;
@@ -40,11 +43,21 @@ export function BarcodeScanner({
           aspectRatio: 1,
         },
         (decodedText) => {
-          onDetected(decodedText);
+          if (!cancelledRef.current) {
+            onDetected(decodedText);
+          }
         },
         () => {}
       )
+      .then(() => {
+        // If cancelled while starting, stop immediately
+        if (cancelledRef.current) {
+          scanner.stop().catch(() => {});
+          scannerRef.current = null;
+        }
+      })
       .catch((err: unknown) => {
+        if (cancelledRef.current) return;
         const msg =
           typeof err === "string"
             ? err
@@ -55,6 +68,7 @@ export function BarcodeScanner({
       });
 
     return () => {
+      cancelledRef.current = true;
       scanner.stop().catch(() => {});
       scanner.clear();
       scannerRef.current = null;

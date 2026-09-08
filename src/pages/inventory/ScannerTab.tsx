@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Camera, CameraOff, ShoppingCart } from "lucide-react";
 import { BarcodeScanner } from "../../components/scanner/BarcodeScanner";
 import { ScanCart } from "../../components/scanner/ScanCart";
@@ -36,10 +36,12 @@ export default function ScannerTab() {
   const [receiptOpen, setReceiptOpen] = useState(false);
 
   const cart = useScanCart();
+  const lookupIdRef = useRef(0);
 
   const lookupProduct = useCallback(
     async (barcode: string) => {
       if (!storeId) return;
+      const lookupId = ++lookupIdRef.current;
       setIsLookingUp(true);
       setActionError(null);
       setActionSuccess(null);
@@ -55,15 +57,21 @@ export default function ScannerTab() {
           .is("archived_at", null)
           .single();
 
+        // Only update state if this is still the latest lookup
+        if (lookupId !== lookupIdRef.current) return;
+
         if (error || !data) {
           setScannedProduct(null);
         } else {
           setScannedProduct(data as Product);
         }
       } catch {
+        if (lookupId !== lookupIdRef.current) return;
         setScannedProduct(null);
       } finally {
-        setIsLookingUp(false);
+        if (lookupId === lookupIdRef.current) {
+          setIsLookingUp(false);
+        }
       }
     },
     [storeId]

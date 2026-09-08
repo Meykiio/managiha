@@ -1,9 +1,13 @@
 type CsvValue = string | number | boolean | null | undefined;
 
+// Neutralize CSV formula injection: prefix dangerous leading chars with '
+const FORMULA_CHARS = /^[=+\-@\t\r]/;
+
 export function buildCsv(headers: string[], rows: CsvValue[][]): string {
   const esc = (v: CsvValue): string => {
     const s = v == null ? "" : String(v);
-    return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    const safe = FORMULA_CHARS.test(s) ? `'${s}` : s;
+    return /[";\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
   };
   const lines = [headers, ...rows].map((row) => row.map(esc).join(";"));
   return "\ufeff" + lines.join("\r\n");

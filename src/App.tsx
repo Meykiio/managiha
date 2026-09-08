@@ -86,11 +86,28 @@ function StoreMissingScreen() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { loading, session, storeMissing } = useAuth();
+  const { loading, session, storeMissing, userDataError, store } = useAuth();
   if (loading) return <FullScreenSpinner />;
   if (!session) return <Navigate to="/login" replace />;
   if (storeMissing) {
     return <StoreMissingScreen />;
+  }
+  if (userDataError && !store) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-neutral-50 px-4">
+        <div className="w-full max-w-md rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-card">
+          <h2 className="text-lg font-semibold text-neutral-900">{t("common.error")}</h2>
+          <p className="mt-2 text-sm text-neutral-600">{userDataError}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          >
+            {t("common.retry")}
+          </button>
+        </div>
+      </div>
+    );
   }
   return <>{children}</>;
 }

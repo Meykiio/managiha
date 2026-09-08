@@ -3,7 +3,7 @@ import { Banknote, AlertTriangle } from "lucide-react";
 import { Input } from "../ui/Input";
 import { fmtMoney } from "../../lib/format";
 import { useAuth } from "../../contexts/AuthContext";
-import { callAdjustStock } from "../../lib/api";
+import { callCheckoutSale } from "../../lib/api";
 import { validateCheckout, getTotalFromValidated, type CheckoutItem } from "../../lib/checkout";
 import { t } from "../../i18n";
 import type { ScanCartItem } from "../../hooks/useScanCart";
@@ -12,9 +12,10 @@ interface CashPaymentProps {
   totalAmount: number;
   items: ScanCartItem[];
   onSuccess: (validatedItems: CheckoutItem[], received: number, change: number) => void;
+  onBusyChange?: (busy: boolean) => void;
 }
 
-export function CashPayment({ totalAmount, items, onSuccess }: CashPaymentProps) {
+export function CashPayment({ totalAmount, items, onSuccess, onBusyChange }: CashPaymentProps) {
   const { store } = useAuth();
   const [validatedItems, setValidatedItems] = useState<CheckoutItem[] | null>(null);
   const [priceChanged, setPriceChanged] = useState(false);
@@ -57,22 +58,22 @@ export function CashPayment({ totalAmount, items, onSuccess }: CashPaymentProps)
   const handleSubmit = async () => {
     if (!isValid || !store || !validatedItems) return;
     setSubmitting(true);
+    onBusyChange?.(true);
     setError(null);
 
     try {
-      for (const item of validatedItems) {
-        await callAdjustStock({
-          productId: item.productId,
-          movementType: "sale",
-          quantity: item.quantity,
-          note: `Vente espèces · ${fmtMoney(item.priceAtCheckout * item.quantity)}`,
-        });
-      }
+      const checkoutItems = validatedItems.map((item) => ({
+        product_id: item.productId,
+        quantity: item.quantity,
+        unit_price: item.priceAtCheckout,
+      }));
+      await callCheckoutSale(checkoutItems, "cash", undefined, receivedNum);
       onSuccess(validatedItems, receivedNum, change);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("common.error"));
     } finally {
       setSubmitting(false);
+      onBusyChange?.(false);
     }
   };
 

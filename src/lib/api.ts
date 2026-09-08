@@ -155,6 +155,8 @@ export async function uploadProductImage(
     .from(BUCKET)
     .upload(path, file, { upsert: true, contentType: file.type });
   if (error) throw new Error(error.message);
+  // Invalidate cache for this product
+  productImageCache.delete(`${storeId}/${productId}`);
   return path;
 }
 
@@ -166,6 +168,8 @@ export async function deleteProductImage(storeId: string, productId: string): Pr
   const paths = files.map((f) => `${storeId}/${productId}/${f.name}`);
   const { error } = await supabase.storage.from(BUCKET).remove(paths);
   if (error) throw new Error(error.message);
+  // Invalidate cache for this product
+  productImageCache.delete(`${storeId}/${productId}`);
 }
 
 export async function getProductImageUrl(storeId: string, productId: string): Promise<string | null> {
@@ -189,3 +193,34 @@ export async function getProductImageUrl(storeId: string, productId: string): Pr
 }
 
 const productImageCache = new Map<string, string | null | undefined>();
+
+export interface CheckoutItem {
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+}
+
+export interface CheckoutResult {
+  total: number;
+  change: number;
+  movement_ids: string[];
+  items_count: number;
+}
+
+export async function callCheckoutSale(
+  items: CheckoutItem[],
+  paymentMode: "cash" | "credit",
+  customerId?: string,
+  amountReceived?: number,
+  note?: string
+): Promise<CheckoutResult> {
+  const { data, error } = await supabase.rpc("checkout_sale", {
+    p_items: items,
+    p_payment_mode: paymentMode,
+    p_customer_id: customerId ?? null,
+    p_amount_received: amountReceived ?? null,
+    p_note: note ?? null,
+  });
+  if (error) throw new Error(error.message);
+  return data as CheckoutResult;
+}
