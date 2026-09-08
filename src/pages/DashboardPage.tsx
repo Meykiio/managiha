@@ -26,7 +26,7 @@ import { fmtMoneyShort, fmtQty } from "../lib/format";
 import { t } from "../i18n";
 
 const STATUS_LABEL = {
-  healthy: "",
+  healthy: t("products.status.healthy"),
   low: t("products.status.low"),
   out: t("products.status.out"),
 };

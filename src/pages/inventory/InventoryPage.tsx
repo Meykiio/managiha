@@ -35,28 +35,28 @@ export default function InventoryPage() {
 
       <div className="max-w-2xl space-y-5">
         {tab === "scanner" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+          <div role="tabpanel" aria-labelledby="tab-scanner" className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <ScannerTab />
           </div>
         )}
         {tab === "receive" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+          <div role="tabpanel" aria-labelledby="tab-receive" className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <ReceiveStockForm />
           </div>
         )}
         {tab === "sell" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+          <div role="tabpanel" aria-labelledby="tab-sell" className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <SellStockForm />
           </div>
         )}
         {tab === "adjust" && (
-          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+          <div role="tabpanel" aria-labelledby="tab-adjust" className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <AdjustStockForm />
           </div>
         )}
       </div>
 
-      {tab === "history" && <HistoryTab />}
+      {tab === "history" && <div role="tabpanel" aria-labelledby="tab-history"><HistoryTab /></div>}
     </div>
   );
 }

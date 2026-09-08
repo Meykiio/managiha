@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { Plus } from "lucide-react";
 import { ensureCategory, fetchCategories } from "../../lib/api";
 import type { Category } from "../../lib/types";
@@ -13,6 +13,7 @@ interface CategoryComboProps {
 }
 
 export function CategoryCombo({ storeId, value, onChange }: CategoryComboProps) {
+  const comboId = useId();
   const [categories, setCategories] = useState<Category[]>([]);
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
@@ -80,13 +81,13 @@ export function CategoryCombo({ storeId, value, onChange }: CategoryComboProps) 
   return (
     <div className="relative w-full" ref={rootRef}>
       <label
-        htmlFor="category-combo"
+        htmlFor={comboId}
         className="mb-1.5 block text-sm font-medium text-neutral-700"
       >
         {t("categoryCombo.label")}
       </label>
       <input
-        id="category-combo"
+        id={comboId}
         autoComplete="off"
         value={text}
         placeholder={t("categoryCombo.placeholder")}
