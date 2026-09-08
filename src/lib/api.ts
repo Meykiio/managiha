@@ -169,12 +169,23 @@ export async function deleteProductImage(storeId: string, productId: string): Pr
 }
 
 export async function getProductImageUrl(storeId: string, productId: string): Promise<string | null> {
+  const cacheKey = `${storeId}/${productId}`;
+  const cached = productImageCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
   const { data: files } = await supabase.storage
     .from(BUCKET)
     .list(`${storeId}/${productId}`);
-  if (!files || files.length === 0) return null;
+  if (!files || files.length === 0) {
+    productImageCache.set(cacheKey, null);
+    return null;
+  }
   const { data } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(`${storeId}/${productId}/${files[0].name}`, 3600);
-  return data?.signedUrl ?? null;
+  const url = data?.signedUrl ?? null;
+  productImageCache.set(cacheKey, url);
+  return url;
 }
+
+const productImageCache = new Map<string, string | null | undefined>();
