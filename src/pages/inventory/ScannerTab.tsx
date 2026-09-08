@@ -4,12 +4,23 @@ import { BarcodeScanner } from "../../components/scanner/BarcodeScanner";
 import { ScanCart } from "../../components/scanner/ScanCart";
 import { ScanResult } from "../../components/scanner/ScanResult";
 import { PaymentModal } from "../../components/scanner/PaymentModal";
+import { ReceiptSummary } from "../../components/scanner/ReceiptSummary";
 import { useBarcodeScanner } from "../../hooks/useBarcodeScanner";
 import { useScanCart } from "../../hooks/useScanCart";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { t } from "../../i18n";
 import type { Product } from "../../lib/types";
+import type { CheckoutItem } from "../../lib/checkout";
+
+interface LastSale {
+  items: CheckoutItem[];
+  totalAmount: number;
+  paymentMode: "cash" | "credit";
+  amountReceived?: number;
+  change?: number;
+  customerName?: string;
+}
 
 export default function ScannerTab() {
   const { store } = useAuth();
@@ -21,6 +32,8 @@ export default function ScannerTab() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [lastSale, setLastSale] = useState<LastSale | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const cart = useScanCart();
 
@@ -93,9 +106,16 @@ export default function ScannerTab() {
     setLastScannedBarcode(null);
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (sale: LastSale) => {
     setPaymentOpen(false);
+    setLastSale(sale);
+    setReceiptOpen(true);
     cart.clearCart();
+  };
+
+  const handleReceiptClose = () => {
+    setReceiptOpen(false);
+    setLastSale(null);
     setActionSuccess(t("scanner.action.sellSuccess"));
     setTimeout(() => setActionSuccess(null), 3000);
   };
@@ -216,6 +236,19 @@ export default function ScannerTab() {
         totalAmount={cart.totalAmount}
         onSuccess={handlePaymentSuccess}
       />
+
+      {lastSale && (
+        <ReceiptSummary
+          open={receiptOpen}
+          onClose={handleReceiptClose}
+          items={lastSale.items}
+          totalAmount={lastSale.totalAmount}
+          paymentMode={lastSale.paymentMode}
+          amountReceived={lastSale.amountReceived}
+          change={lastSale.change}
+          customerName={lastSale.customerName}
+        />
+      )}
     </div>
   );
 }

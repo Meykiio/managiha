@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { CreditCard, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CreditCard, AlertTriangle } from "lucide-react";
 import { Input } from "../ui/Input";
 import { CustomerSelect } from "../carnet/CustomerSelect";
 import { fmtMoney } from "../../lib/format";
 import { useAuth } from "../../contexts/AuthContext";
 import { callAdjustStock, callRecordCarnetTransaction } from "../../lib/api";
+import { validateCheckout, getTotalFromValidated, type CheckoutItem } from "../../lib/checkout";
 import { supabase } from "../../lib/supabaseClient";
 import { t } from "../../i18n";
 import type { ScanCartItem } from "../../hooks/useScanCart";
@@ -12,11 +13,19 @@ import type { ScanCartItem } from "../../hooks/useScanCart";
 interface CreditPaymentProps {
   totalAmount: number;
   items: ScanCartItem[];
-  onSuccess: () => void;
+  onSuccess: (validatedItems: CheckoutItem[], customerName: string) => void;
 }
 
 export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentProps) {
   const { store } = useAuth();
+  const [validatedItems, setValidatedItems] = useState<CheckoutItem[] | null>(null);
+  const [priceChanged, setPriceChanged] = useState(false);
+  const [stockIssues, setStockIssues] = useState<string[]>([]);
+  const [validating, setValidating] = useState(true);
+  const [validateError, setValidateError] = useState<string | null>(null);
+
+  const finalTotal = validatedItems ? getTotalFromValidated(validatedItems) : totalAmount;
+
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [newName, setNewName] = useState("");
@@ -25,8 +34,27 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ customer?: string; newName?: string }>({});
 
+  useEffect(() => {
+    let cancelled = false;
+    setValidating(true);
+    validateCheckout(items)
+      .then((v) => {
+        if (cancelled) return;
+        setValidatedItems(v.items);
+        setPriceChanged(v.priceChanged);
+        setStockIssues(v.stockIssues);
+        setValidating(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setValidateError(err instanceof Error ? err.message : t("common.error"));
+        setValidating(false);
+      });
+    return () => { cancelled = true; };
+  }, [items]);
+
   const handleSubmit = async () => {
-    if (!store || items.length === 0) return;
+    if (!store || !validatedItems) return;
 
     const nextErrors: typeof errors = {};
     let finalCustomerId = customerId;
@@ -58,29 +86,46 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
         finalCustomerId = inserted.data.id as string;
       }
 
-      for (const item of items) {
+      for (const item of validatedItems) {
         await callAdjustStock({
-          productId: item.product.id,
+          productId: item.productId,
           movementType: "sale",
           quantity: item.quantity,
-          note: `Vente crédit · ${fmtMoney(item.product.sell_price * item.quantity)}`,
+          note: `Vente crédit · ${fmtMoney(item.priceAtCheckout * item.quantity)}`,
         });
       }
 
       await callRecordCarnetTransaction({
         customerId: finalCustomerId!,
         type: "credit",
-        amount: totalAmount,
-        note: `Achat scanner · ${items.length} produit(s)`,
+        amount: finalTotal,
+        note: `Achat scanner · ${validatedItems.length} produit(s)`,
       });
 
-      onSuccess();
+      const customerDisplayName = isNewCustomer ? newName.trim() : customerId;
+      onSuccess(validatedItems, customerDisplayName ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("common.error"));
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (validating) {
+    return (
+      <div className="py-8 text-center text-sm text-neutral-500">
+        {t("scanner.payment.validating")}
+      </div>
+    );
+  }
+
+  if (validateError) {
+    return (
+      <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">
+        {validateError}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -89,9 +134,29 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
           {t("scanner.payment.total")}
         </p>
         <p className="mt-1 text-2xl font-bold text-blue-800">
-          {fmtMoney(totalAmount)}
+          {fmtMoney(finalTotal)}
         </p>
       </div>
+
+      {priceChanged && (
+        <div className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+          <p className="text-xs text-amber-700">
+            {t("scanner.payment.priceChanged")}
+          </p>
+        </div>
+      )}
+
+      {stockIssues.length > 0 && (
+        <div className="rounded-lg bg-red-50 px-3 py-2">
+          <p className="mb-1 text-xs font-medium text-red-700">
+            {t("scanner.payment.stockInsufficient")}
+          </p>
+          {stockIssues.map((issue, i) => (
+            <p key={i} className="text-xs text-red-600">• {issue}</p>
+          ))}
+        </div>
+      )}
 
       <div>
         <div className="flex items-center justify-between">
@@ -150,7 +215,7 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={(!customerId && !isNewCustomer) || submitting}
+        disabled={(!customerId && !isNewCustomer) || submitting || stockIssues.length > 0}
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
       >
         <CreditCard size={18} />

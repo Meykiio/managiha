@@ -313,4 +313,16 @@
   "scanner.payment.newCustomerName": "Nom du client",
   "scanner.payment.newCustomerPhone": "Téléphone (facultatif)",
   "scanner.payment.confirmCredit": "Enregistrer le crédit",
+  "scanner.payment.validating": "Vérification du stock…",
+  "scanner.payment.priceChanged": "Un ou plusieurs prix ont changé depuis le scan. Le prix actuel est utilisé.",
+  "scanner.payment.stockInsufficient": "Stock insuffisant :",
+
+  "receipt.success": "Vente enregistrée",
+  "receipt.total": "Total",
+  "receipt.cash": "Espèces",
+  "receipt.credit": "Crédit",
+  "receipt.received": "Reçu",
+  "receipt.change": "Monnaie",
+  "receipt.creditNote": "Le montant a été ajouté au carnet du client.",
+  "receipt.close": "Fermer",
 } as const;

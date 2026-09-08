@@ -5,15 +5,25 @@ import { CreditPayment } from "./CreditPayment";
 import { t } from "../../i18n";
 import { cn } from "../../lib/utils";
 import type { ScanCartItem } from "../../hooks/useScanCart";
+import type { CheckoutItem } from "../../lib/checkout";
 
 type PaymentMode = "cash" | "credit";
+
+interface SaleDetails {
+  items: CheckoutItem[];
+  totalAmount: number;
+  paymentMode: "cash" | "credit";
+  amountReceived?: number;
+  change?: number;
+  customerName?: string;
+}
 
 interface PaymentModalProps {
   open: boolean;
   onClose: () => void;
   items: ScanCartItem[];
   totalAmount: number;
-  onSuccess: () => void;
+  onSuccess: (sale: SaleDetails) => void;
 }
 
 export function PaymentModal({
@@ -84,14 +94,29 @@ export function PaymentModal({
           <CashPayment
             totalAmount={totalAmount}
             items={items}
-            onSuccess={onSuccess}
+            onSuccess={(validatedItems, received, change) =>
+              onSuccess({
+                items: validatedItems,
+                totalAmount: validatedItems.reduce((s, i) => s + i.priceAtCheckout * i.quantity, 0),
+                paymentMode: "cash",
+                amountReceived: received,
+                change,
+              })
+            }
           />
         )}
         {mode === "credit" && (
           <CreditPayment
             totalAmount={totalAmount}
             items={items}
-            onSuccess={onSuccess}
+            onSuccess={(validatedItems, customerName) =>
+              onSuccess({
+                items: validatedItems,
+                totalAmount: validatedItems.reduce((s, i) => s + i.priceAtCheckout * i.quantity, 0),
+                paymentMode: "credit",
+                customerName,
+              })
+            }
           />
         )}
       </div>
