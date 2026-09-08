@@ -5,16 +5,17 @@ import { ReceiveStockForm } from "../../components/inventory/ReceiveStockForm";
 import { AdjustStockForm } from "../../components/inventory/AdjustStockForm";
 import { SellStockForm } from "../../components/inventory/SellStockForm";
 import HistoryTab from "./HistoryTab";
+import ScannerTab from "./ScannerTab";
 import { t } from "../../i18n";
 
-type TabKey = "receive" | "sell" | "adjust" | "history";
+type TabKey = "scanner" | "receive" | "sell" | "adjust" | "history";
 
 export default function InventoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab = (searchParams.get("tab") as TabKey) || "receive";
+  const tab = (searchParams.get("tab") as TabKey) || "scanner";
 
   const setTab = (key: string) => {
-    setSearchParams(key === "receive" ? {} : { tab: key });
+    setSearchParams(key === "scanner" ? {} : { tab: key });
   };
 
   return (
@@ -22,6 +23,7 @@ export default function InventoryPage() {
       <PageHeader title={t("inventory.title")} />
       <Tabs<TabKey>
         tabs={[
+          { key: "scanner", label: t("inventory.tab.scanner") },
           { key: "receive", label: t("inventory.tab.receive") },
           { key: "sell", label: t("inventory.tab.sell") },
           { key: "adjust", label: t("inventory.tab.adjust") },
@@ -32,6 +34,11 @@ export default function InventoryPage() {
       />
 
       <div className="max-w-2xl space-y-5">
+        {tab === "scanner" && (
+          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
+            <ScannerTab />
+          </div>
+        )}
         {tab === "receive" && (
           <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-card sm:p-6">
             <ReceiveStockForm />
