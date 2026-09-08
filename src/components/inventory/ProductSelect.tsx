@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
 import { ChevronDown, Search } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { fmtQty } from "../../lib/format";
@@ -24,6 +24,7 @@ interface ProductSelectProps {
 }
 
 export function ProductSelect({ value, onChange, storeId, label }: ProductSelectProps) {
+  const selectId = useId();
   const [products, setProducts] = useState<ProductLite[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -88,9 +89,10 @@ export function ProductSelect({ value, onChange, storeId, label }: ProductSelect
   return (
     <div className="relative w-full" ref={rootRef}>
       {label && (
-        <span className="mb-1.5 block text-sm font-medium text-neutral-700">{label}</span>
+        <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium text-neutral-700">{label}</label>
       )}
       <button
+        id={selectId}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"

@@ -55,7 +55,7 @@ describe("SellStockForm", () => {
     render(<SellStockForm />);
 
     await userEvent.click(
-      await screen.findByRole("button", { name: /rechercher un produit/i })
+      screen.getByRole("button", { name: /produit/i })
     );
     await screen.findByText("Coca 1L");
     await userEvent.click(screen.getByText("Coca 1L"));

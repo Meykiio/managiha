@@ -19,13 +19,12 @@ interface ProductFiltersProps {
   onChange: (value: ProductFilterState) => void;
 }
 
-const STATUS_LABELS: Record<StockStatus, string> = {
-  healthy: t("products.status.healthy"),
-  low: t("products.status.low"),
-  out: t("products.status.out"),
-};
-
 export function ProductFilters({ categories, suppliers, value, onChange }: ProductFiltersProps) {
+  const STATUS_LABELS: Record<StockStatus, string> = {
+    healthy: t("products.status.healthy"),
+    low: t("products.status.low"),
+    out: t("products.status.out"),
+  };
   const set = (patch: Partial<ProductFilterState>) => onChange({ ...value, ...patch });
 
   return (

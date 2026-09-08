@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import { ChevronDown, Search } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { searchCarnetCustomers } from "../../lib/api";
@@ -11,9 +11,11 @@ interface CustomerSelectProps {
   value: string | null;
   onChange: (customerId: string | null) => void;
   storeId: string;
+  label?: string;
 }
 
-export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps) {
+export function CustomerSelect({ value, onChange, storeId, label }: CustomerSelectProps) {
+  const selectId = useId();
   const [results, setResults] = useState<CarnetCustomer[]>([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -56,7 +58,11 @@ export function CustomerSelect({ value, onChange, storeId }: CustomerSelectProps
 
   return (
     <div className="relative w-full" ref={rootRef}>
+      {label && (
+        <label htmlFor={selectId} className="mb-1.5 block text-sm font-medium text-neutral-700">{label}</label>
+      )}
       <button
+        id={selectId}
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
