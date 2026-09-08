@@ -49,17 +49,17 @@ export function AdjustStockForm({ onSuccess }: AdjustStockFormProps) {
     e.preventDefault();
     if (!store) return;
     const nextErrors: typeof errors = {};
-    if (!productId) nextErrors.product = "Sélectionnez un produit";
-    if (!reason) nextErrors.reason = "Le motif est obligatoire";
+    if (!productId) nextErrors.product = t("validate.selectProduct");
+    if (!reason) nextErrors.reason = t("validate.motiveRequired");
     const qty = Number(quantity.replace(",", "."));
     if (quantity === "" || Number.isNaN(qty)) {
-      nextErrors.quantity = "Entrez une quantité valide";
+      nextErrors.quantity = t("validate.quantityInvalid");
     } else if (isRemoval && qty <= 0) {
-      nextErrors.quantity = "Entrez une quantité supérieure à 0";
+      nextErrors.quantity = t("validate.quantityPositive");
     } else if (isCorrection && qty === 0) {
-      nextErrors.quantity = "La correction ne peut pas être nulle";
+      nextErrors.quantity = t("validate.correctionZero");
     } else if (reason === "count_adjustment" && qty < 0) {
-      nextErrors.quantity = "La quantité constatée ne peut pas être négative";
+      nextErrors.quantity = t("validate.quantityNonNegative");
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !productId) return;
@@ -67,7 +67,7 @@ export function AdjustStockForm({ onSuccess }: AdjustStockFormProps) {
     setSubmitting(true);
     try {
       if (reason === "count_adjustment" && selectedProduct && qty === Number(selectedProduct.current_stock)) {
-        showToast("Aucun changement de stock à enregistrer.", "error");
+        showToast(t("inventory.adjust.noChange"), "error");
         setSubmitting(false);
         return;
       }

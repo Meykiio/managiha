@@ -143,6 +143,18 @@ export const fr = {
   "validate.noStockChange": "Aucun changement de stock",
   "validate.amountPositive": "Entrez un montant supérieur à 0",
   "validate.amountInvalid": "Montant invalide",
+  "validate.quantityInvalid": "Entrez une quantité valide",
+  "validate.correctionZero": "La correction ne peut pas être nulle",
+
+  "auth.error.invalidCredentials": "Email ou mot de passe incorrect.",
+  "auth.error.userExists": "Un compte existe déjà avec cet email.",
+  "auth.error.passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères.",
+  "auth.error.emailNotConfirmed": "Veuillez d'abord confirmer votre adresse email.",
+  "auth.error.generic": "Une erreur est survenue.",
+
+  "scanner.error": "Erreur de scanner",
+  "scanner.status.low": "Faible",
+  "scanner.status.out": "Rupture",
 
   "inventory.adjust.title": "Ajuster le stock",
   "inventory.adjust.currentStock": "Stock actuel :",

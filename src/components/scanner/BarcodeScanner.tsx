@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { Camera, CameraOff } from "lucide-react";
+import { t } from "../../i18n";
 
 interface BarcodeScannerProps {
   isActive: boolean;
@@ -49,7 +50,7 @@ export function BarcodeScanner({
             ? err
             : err instanceof Error
               ? err.message
-              : "Erreur de scanner";
+              : t("scanner.error");
         onError?.(msg);
       });
 
@@ -75,7 +76,7 @@ export function BarcodeScanner({
       {!isActive && (
         <div className="flex min-h-[250px] flex-col items-center justify-center gap-3 text-white">
           <CameraOff size={40} className="text-white/40" />
-          <p className="text-sm text-white/60">Caméra désactivée</p>
+          <p className="text-sm text-white/60">{t("scanner.cameraOff")}</p>
         </div>
       )}
     </div>

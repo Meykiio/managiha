@@ -9,6 +9,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClient";
 import type { Profile, Store } from "../lib/types";
+import { t } from "../i18n";
 
 interface SignUpInput {
   email: string;
@@ -45,15 +46,15 @@ export function useAuth(): AuthContextValue {
 function mapAuthError(message: string | undefined): string {
   switch (message) {
     case "Invalid login credentials":
-      return "Email ou mot de passe incorrect.";
+      return t("auth.error.invalidCredentials");
     case "User already registered":
-      return "Un compte existe déjà avec cet email.";
+      return t("auth.error.userExists");
     case "Password should be at least 6 characters":
-      return "Le mot de passe doit contenir au moins 6 caractères.";
+      return t("auth.error.passwordTooShort");
     case "Email not confirmed":
-      return "Veuillez d'abord confirmer votre adresse email.";
+      return t("auth.error.emailNotConfirmed");
     default:
-      return message || "Une erreur est survenue.";
+      return message || t("auth.error.generic");
   }
 }
 

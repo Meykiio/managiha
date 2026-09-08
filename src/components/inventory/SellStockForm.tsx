@@ -23,10 +23,10 @@ export function SellStockForm({ onSuccess }: { onSuccess?: () => void }) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const nextErrors: typeof errors = {};
-    if (!productId) nextErrors.product = "Sélectionnez un produit";
+    if (!productId) nextErrors.product = t("validate.selectProduct");
     const qty = Number(quantity.replace(",", "."));
     if (quantity === "" || Number.isNaN(qty) || qty <= 0) {
-      nextErrors.quantity = "Entrez une quantité supérieure à 0";
+      nextErrors.quantity = t("validate.quantityPositive");
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0 || !productId) return;

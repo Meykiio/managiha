@@ -60,9 +60,9 @@ export function CreditPayment({ totalAmount, items, onSuccess }: CreditPaymentPr
     let finalCustomerId = customerId;
 
     if (isNewCustomer) {
-      if (!newName.trim()) nextErrors.newName = "Le nom est obligatoire";
+      if (!newName.trim()) nextErrors.newName = t("validate.nameRequired");
     } else if (!finalCustomerId) {
-      nextErrors.customer = "Sélectionnez un client";
+      nextErrors.customer = t("validate.selectCustomer");
     }
 
     setErrors(nextErrors);

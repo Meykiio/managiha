@@ -150,7 +150,7 @@ export function ProductFormFields({
           min="0"
           value={values.currentStock}
           hint={
-            isEdit ? undefined : "Le stock initial sera enregistré comme mouvement « Stock initial »."
+            isEdit ? undefined : t("inventory.form.initialStockHint")
           }
           onChange={(e) => set("currentStock", e.target.value)}
         />
@@ -206,11 +206,11 @@ export function productFormErrors(
   values: ProductFormValues
 ): Partial<Record<keyof ProductFormValues, string>> {
   const errors: Partial<Record<keyof ProductFormValues, string>> = {};
-  if (!values.name.trim()) errors.name = "Le nom est obligatoire";
+  if (!values.name.trim()) errors.name = t("validate.nameRequired");
   for (const key of ["costPrice", "sellPrice"] as const) {
     const raw = values[key];
     if (raw !== "" && (Number.isNaN(Number(raw)) || Number(raw) < 0)) {
-      errors[key] = "Montant invalide";
+      errors[key] = t("validate.amountInvalid");
     }
   }
   return errors;

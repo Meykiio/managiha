@@ -39,7 +39,7 @@ export function CustomerFormModal({ open, onClose, customer, onSaved }: Customer
     e.preventDefault();
     if (!store) return;
     if (!fullName.trim()) {
-      setError("Le nom est obligatoire");
+      setError(t("validate.nameRequired"));
       return;
     }
     setSaving(true);

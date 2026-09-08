@@ -12,8 +12,8 @@ import type { StockStatus } from "../../lib/types";
 
 const STATUS_LABEL: Record<StockStatus, string> = {
   healthy: "OK",
-  low: "Faible",
-  out: "Rupture",
+  low: t("scanner.status.low"),
+  out: t("scanner.status.out"),
 };
 
 interface ProductSelectProps {

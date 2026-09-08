@@ -54,20 +54,20 @@ export function AdjustStockModal({
     e.preventDefault();
     if (!store || !effectiveProductId) return;
     const nextErrors: typeof errors = {};
-    if (!reason) nextErrors.reason = "Le motif est obligatoire";
+    if (!reason) nextErrors.reason = t("validate.motiveRequired");
     const qty = Number(quantity.replace(",", "."));
     if (Number.isNaN(qty)) {
-      nextErrors.quantity = "Quantité invalide";
+      nextErrors.quantity = t("validate.quantityInvalid");
     } else if (isRemoval && qty <= 0) {
-      nextErrors.quantity = "Entrez une quantité supérieure à 0";
+      nextErrors.quantity = t("validate.quantityPositive");
     } else if (isCorrection && qty === 0) {
-      nextErrors.quantity = "La correction ne peut pas être nulle";
+      nextErrors.quantity = t("validate.correctionZero");
     } else if (
       reason === "count_adjustment" &&
       productInfo &&
       qty === Number(productInfo.current_stock)
     ) {
-      nextErrors.quantity = "Aucun changement de stock";
+      nextErrors.quantity = t("validate.noStockChange");
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -95,7 +95,7 @@ export function AdjustStockModal({
   if (!store) return null;
 
   return (
-    <Modal open={open} onClose={onClose} title="Ajuster le stock">
+    <Modal open={open} onClose={onClose} title={t("inventory.adjust.title")}>
       <form onSubmit={handleSubmit} className="space-y-4 pb-3">
         <ProductSelect
           storeId={store.id}
@@ -110,7 +110,7 @@ export function AdjustStockModal({
         />
         {productInfo && !isRemoval && (
           <p className="-mt-2 text-xs text-neutral-500">
-            Stock actuel :{" "}
+            {t("inventory.adjust.currentStock")}{" "}
             <span className="font-semibold tnum">
               {fmtQty(productInfo.current_stock)} {unitShort(productInfo.unit)}
             </span>
