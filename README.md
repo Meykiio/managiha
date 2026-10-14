@@ -95,7 +95,7 @@ runs on a cheap Android phone on a bad connection.
 | Tool | Why |
 |---|---|
 | **Git** | to clone the repository |
-| **Node.js 20+** | to build and run the app |
+| **Node.js 20+** | to build and run the app (22 LTS recommended — 20 is end-of-life) |
 | **npm** | comes with Node |
 | **A Supabase project** | free tier is enough — [supabase.com](https://supabase.com) |
 
