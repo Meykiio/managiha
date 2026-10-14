@@ -1,0 +1,313 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — "SaaS Analytics" system (Reference Build 01)
+
+   Theming is pure CSS: every colour is a custom property, and one attribute
+   switch on <html> flips the whole application. No JavaScript participates in
+   theming, which is the system's own engineering rule ("Token Layer: CSS custom
+   properties in :root and [data-theme]. Zero JS for theming").
+
+   Default is dark, per the system. Light is the `[data-theme="light"]` variant.
+
+   RECOLOURING FOR THIS PROJECT: the system's own "how to customize" step 2 says
+   to change --primary, --secondary, --tertiary, --quaternary and --positive. That
+   has deliberately NOT been done — Managiha keeps the steel-blue/teal identity the
+   system ships with, because a grocery back office has no brand palette of its own
+   yet. When one exists, those five values in both blocks are the only edit.
+
+   CONTRAST: every foreground/background pair in both blocks was measured, not
+   assumed. The interface grays are held at or above 4.5:1 against their surface,
+   which is why --on-surface-muted is #7a7d8a rather than something lighter. The
+   axe E2E suite asserts this against the real DOM in both themes and in RTL.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces, darkest to lightest. */
+  --bg: #0a0a0f;
+  --bg-dim: #060609;
+  --surface: #111118;
+  --surface-mid: #18181f;
+  --surface-high: #1f1f28;
+  --surface-highest: #282832;
+
+  /* Foregrounds. Measured against --surface: 15.7:1 and 4.6:1. */
+  --on-surface: #e8eaef;
+  --on-surface-soft: #b9bcc7;
+  --on-surface-muted: #7a7d8a;
+
+  --outline: #262630;
+  --outline-hi: #3a3a48;
+
+  --primary: #3b82f6;
+  /* NOT #3b82f6. The reference system sets --primary-solid and --primary to the
+     same bright blue in dark mode, and white on #3b82f6 measures 3.67:1 — it
+     fails WCAG AA for button text. The two roles genuinely differ:
+       --primary       is for text and accents ON a dark surface (5.15:1 there)
+       --primary-solid is for FILLS under white text and must be darker
+     #2563eb measures 5.12:1 with white, so the fill darkens and the accent does
+     not. Found by the axe suite on its first dark-mode run. */
+  --primary-solid: #2563eb;
+  --on-primary: #ffffff;
+  --primary-tint: rgba(59, 130, 246, 0.12);
+  --primary-tint-strong: rgba(59, 130, 246, 0.2);
+  --brand-blue: #60a5fa;
+
+  --secondary: #14b8a6;
+  --on-secondary: #042f2e;
+  --secondary-tint: rgba(20, 184, 166, 0.14);
+
+  --tertiary: #f59e0b;
+  --on-tertiary: #451a03;
+  --tertiary-tint: rgba(245, 158, 11, 0.14);
+
+  --quaternary: #ec4899;
+  --on-quaternary: #500724;
+  --quaternary-tint: rgba(236, 72, 153, 0.14);
+
+  --positive: #22c55e;
+  --positive-tint: rgba(34, 197, 94, 0.14);
+  --error: #ef4444;
+  --error-tint: rgba(239, 68, 68, 0.14);
+  --warning: #f59e0b;
+  --warning-tint: rgba(245, 158, 11, 0.14);
+  --info: #60a5fa;
+  --info-tint: rgba(59, 130, 246, 0.12);
+
+  /* Functional tones carry a text colour that clears 4.5:1 on their own tint. */
+  --positive-fg: #4ade80;
+  --error-fg: #f87171;
+  --warning-fg: #fbbf24;
+  --info-fg: #60a5fa;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+
+  --scroll-track: #111118;
+  --scroll-thumb: #2a2a35;
+  --scroll-thumb-hi: #3b82f6;
+
+  --table-header-bg: #18181f;
+  --table-row-bg: #0a0a0f;
+  --table-row-hover: #111118;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f8f9fb;
+  --bg-dim: #f0f1f4;
+  --surface: #ffffff;
+  --surface-mid: #f5f6f8;
+  --surface-high: #ecedf1;
+  --surface-highest: #dde0e6;
+
+  --on-surface: #111318;
+  --on-surface-soft: #3d4049;
+  --on-surface-muted: #5a5d6a;
+
+  --outline: #dde0e6;
+  --outline-hi: #a3a7b4;
+
+  --primary: #2563eb;
+  --primary-solid: #2563eb;
+  --on-primary: #ffffff;
+  --primary-tint: rgba(37, 99, 235, 0.08);
+  --primary-tint-strong: rgba(37, 99, 235, 0.16);
+  --brand-blue: #2563eb;
+
+  --secondary: #0d9488;
+  --on-secondary: #ffffff;
+  --secondary-tint: rgba(13, 148, 136, 0.1);
+
+  --tertiary: #b45309;
+  --on-tertiary: #ffffff;
+  --tertiary-tint: rgba(180, 83, 9, 0.1);
+
+  --quaternary: #be185d;
+  --on-quaternary: #ffffff;
+  --quaternary-tint: rgba(190, 24, 93, 0.1);
+
+  --positive: #16a34a;
+  --positive-tint: rgba(22, 163, 74, 0.1);
+  --error: #dc2626;
+  --error-tint: rgba(220, 38, 38, 0.1);
+  --warning: #b45309;
+  --warning-tint: rgba(180, 83, 9, 0.1);
+  --info: #2563eb;
+  --info-tint: rgba(37, 99, 235, 0.08);
+
+  --positive-fg: #15803d;
+  --error-fg: #b91c1c;
+  --warning-fg: #92400e;
+  --info-fg: #1d4ed8;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+
+  --scroll-track: #f0f1f4;
+  --scroll-thumb: #dde0e6;
+  --scroll-thumb-hi: #2563eb;
+
+  --table-header-bg: #f0f1f4;
+  --table-row-bg: #ffffff;
+  --table-row-hover: #f5f6f8;
+}
+
+/* Motion tokens. Container queries do not exist here; these are global. */
+:root {
+  --ease-snappy: cubic-bezier(0.2, 0, 0.4, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+  --dur-fast: 0.12s;
+  --dur-med: 0.22s;
+  --dur-slow: 0.4s;
+  --transition-theme: background var(--dur-med), color var(--dur-med),
+    border-color var(--dur-med), box-shadow var(--dur-med);
+}
+
+/* Accessibility rule from the system: "Check prefers-reduced-motion. Set --dur-*
+   to 0s when active." Zeroing the tokens disables every transition that reads
+   them in one place, rather than chasing each animation individually. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0s;
+    --dur-med: 0s;
+    --dur-slow: 0s;
+    --transition-theme: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--on-surface);
+    /* 14px base, 1.4 line-height: the system's compact density. */
+    font-size: 14px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    transition: var(--transition-theme);
+  }
+
+  ::selection {
+    background: var(--primary-solid);
+    color: var(--on-primary);
+  }
+
+  /* One focus treatment for the whole application: "2px solid primary, 2px
+     offset. Visible on all interactive elements." Declared once here so no
+     component can forget it, and offset so it never touches the control edge. */
+  :focus-visible {
+    outline: 2px solid var(--primary-solid);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--scroll-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scroll-thumb-hi);
+  }
+
+  /* Inputs inherit the theme rather than the browser default white. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--on-surface-muted);
+    opacity: 1;
+  }
+
+  /* iOS zooms any input below 16px on focus. The compact 14px base is kept and
+     the zoom suppressed instead, because 16px would break the density rule. */
+  @supports (-webkit-touch-callout: none) {
+    input,
+    select,
+    textarea {
+      font-size: max(16px, 1em);
+    }
+  }
+}
+
+@layer utilities {
+  /* Engineering rule: "All numeric displays must use font-variant-numeric:
+     tabular-nums." Applied via .tnum rather than globally so prose stays
+     proportional. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Hides the scrollbar on a horizontally scrollable strip — used by the tab
+     bars, which overflow on a phone and must scroll rather than push the page
+     sideways. The strip is still keyboard- and touch-scrollable; only the
+     affordance is removed, and the tabs' own active/selected state is what tells
+     the user the row continues. */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Skeleton shimmer, from the system's Skeleton Grid component. */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--surface-high) 25%,
+      var(--surface-highest) 37%,
+      var(--surface-high) 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0 50%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer {
+      animation: none;
+      background: var(--surface-high);
+    }
+  }
+}

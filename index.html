@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Kept in sync with --bg for each theme, so the browser chrome matches. -->
+    <meta name="theme-color" content="#0a0a0f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f8f9fb" media="(prefers-color-scheme: light)" />
+    <meta
+      name="description"
+      content="Managiha — Gérez le stock et le carnet de crédit de votre épicerie simplement."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Managiha — Gestion de stock & carnet" />
+    <meta
+      property="og:description"
+      content="Plateforme de gestion de stock et de carnet de crédit pour les épiceries algériennes. DZD, français, simple."
+    />
+    <meta property="og:image" content="https://managiha.vercel.app/favicon.svg" />
+    <title>Managiha — Gestion de stock & carnet</title>
+
+    <!--
+      Applies the stored theme before first paint.
+
+      This is the one piece of theming JavaScript the design system allows, and it
+      has to be inline and synchronous: anything deferred runs after the first
+      frame, so a user who chose light would see a dark flash on every load. Comes
+      before the stylesheets so the attribute is already set when they apply.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("managiha_theme");
+          var theme = stored === "light" || stored === "dark" ? stored : "dark";
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          /* Private mode. The markup default (dark) stands. */
+        }
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Inter for UI, JetBrains Mono for numeric displays, per the type system. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

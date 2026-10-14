@@ -1,0 +1,70 @@
+version: 2
+
+# Dependabot.
+#
+# Grouped and scheduled rather than chatty. The point is to keep the security
+# patches flowing without producing a dozen pull requests a week that nobody
+# reviews — a bot whose PRs are ignored is worse than no bot, because it trains
+# people to ignore the one that matters.
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Algiers
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      # Runtime dependencies move together, because they ship together.
+      runtime:
+        patterns:
+          - react
+          - react-dom
+          - react-router-dom
+          - "@supabase/supabase-js"
+          - lucide-react
+          - clsx
+        update-types:
+          - minor
+          - patch
+      # The toolchain is where a minor bump can break the build for reasons that
+      # have nothing to do with the app, so those stay separate and reviewed.
+      toolchain:
+        patterns:
+          - vite
+          - "@vitejs/*"
+          - vitest
+          - "@vitest/*"
+          - typescript
+          - tailwindcss
+          - postcss
+          - autoprefixer
+          - eslint
+          - "@types/*"
+        update-types:
+          - patch
+      # Anything else, low risk only, batched.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # react-router 6 to 7 is a planned, isolated migration, not a dependabot PR.
+      - dependency-name: react-router-dom
+        update-types: ["version-update:semver-major"]
+      # Tailwind 4 changes the config format and needs the palette migration
+      # alongside it; a bot bump would break the build on main.
+      - dependency-name: tailwindcss
+        update-types: ["version-update:semver-major"]
+      - dependency-name: vite
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

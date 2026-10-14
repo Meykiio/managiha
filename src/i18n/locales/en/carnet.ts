@@ -1,0 +1,72 @@
+/** English (en) - carnet domain. */
+export const en = {
+  "customerSelect.search": "Search a customer…",
+  "customerSelect.selected": "Customer selected",
+  "customerSelect.empty": "No customer found",
+
+  "carnet.customer.restoreHint": "{name} will reappear in the credit book.",
+  "carnet.title": "Credit book",
+  "carnet.showArchived": "Show archived",
+  "carnet.subtitle": "Track your customers' credit and payments.",
+  "carnet.newEntry": "New entry",
+  "carnet.newCustomer": "New customer",
+  "carnet.table.customer": "Customer",
+  "carnet.table.balance": "Balance owed",
+  "carnet.table.lastActivity": "Last activity",
+  "carnet.balance.owed": "Owes {amount}",
+  "carnet.balance.settled": "Up to date",
+  "carnet.balance.advance": "Advance credited",
+  "carnet.empty.title": "No customers on credit",
+  "carnet.empty.body":
+    "Add a customer to track their credit and their payments.",
+  "carnet.emptyFiltered.title": "No results",
+  "carnet.emptyFiltered.body": "Try adjusting your search.",
+
+  "customerDetail.back": "Back to the credit book",
+  "customerDetail.balanceLabel": "Balance owed",
+  "customerDetail.owed": "Owes the shop",
+  "customerDetail.recordPayment": "Record a payment",
+  "customerDetail.shareWhatsApp": "Share a WhatsApp reminder",
+  "customerDetail.noPhoneWarning":
+    "Add a phone number to share a WhatsApp reminder.",
+  "customerDetail.history": "Transaction history",
+  "customerDetail.tx.type": "Type",
+  "customerDetail.tx.amount": "Amount",
+  "customerDetail.tx.note": "Note",
+  "customerDetail.emptyHistory": "No transactions for this customer.",
+  "customerDetail.whatsappMessage":
+    "Hello {name}, this is {store}. Just a friendly reminder that your balance of {balance} is still outstanding at the shop. Please drop by when you can. Thank you!",
+  "customerDetail.archiveConfirm.title": "Archive this customer?",
+  "customerDetail.archiveConfirm.body":
+    "The customer will be hidden from the credit book. Their history is kept and they can be restored.",
+  "customerDetail.dataRights": "Customer rights (Law 18-07)",
+  "customerDetail.dataRightsBody":
+    "A customer may ask for a copy of their data, or for it to be erased. Erasure replaces their name and phone, keeps the transactions (an accounting obligation) and leaves a record that it happened.",
+  "customerDetail.exportData": "Export data",
+  "customerDetail.anonymize": "Erase personal data",
+  "customerDetail.alreadyAnonymized": "This customer's personal data has been erased.",
+  "customerDetail.anonymizedName": "Anonymised customer",
+  "customerDetail.anonymizeConfirm.title": "Erase the personal data?",
+  "customerDetail.anonymizeConfirm.body":
+    "The name, phone and notes will be permanently replaced. Transactions are kept without an identity, as accounting law requires. This cannot be undone.",
+
+  "carnetEntry.title": "New credit book entry",
+  "carnetEntry.customer": "Customer",
+  "carnetEntry.newCustomerToggle": "+ New customer",
+  "carnetEntry.newCustomerName": "Customer name",
+  "carnetEntry.newCustomerPhone": "Phone",
+  "carnetEntry.type": "Operation type",
+  "carnetEntry.typeCredit": "Credit",
+  "carnetEntry.typeCreditHelp": "The customer owes more",
+  "carnetEntry.typePayment": "Payment",
+  "carnetEntry.typePaymentHelp": "The customer pays off part of the balance",
+  "carnetEntry.amount": "Amount",
+  "carnetEntry.note": "Note",
+  "carnetEntry.submit": "Record entry",
+
+  "customerForm.titleNew": "New customer",
+  "customerForm.titleEdit": "Edit customer",
+  "customerForm.name": "Full name",
+  "customerForm.phone": "Phone",
+  "customerForm.notes": "Notes",
+} as const;

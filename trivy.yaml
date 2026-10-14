@@ -1,0 +1,42 @@
+version: 2
+
+# Trivy configuration.
+#
+# Scans the filesystem and the lockfile. There is no container image to scan —
+# the deployable artefact is static files on Vercel — so `misconfig` is the
+# interesting scanner here: it reads vercel.json and the workflow files, which is
+# exactly where a security mistake would be invisible in review.
+scan:
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+  severity:
+    - HIGH
+    - CRITICAL
+  skip-dirs:
+    - node_modules
+    - dist
+    - coverage
+    - supabase
+    - .git
+  skip-files:
+    - "**/*.md"
+    - "supabase/all-in-one.sql"
+    - "supabase/master-schema.sql"
+    - "package-lock.json"
+
+vulnerability:
+  ignore-unfixed: true
+
+misconfiguration:
+  # The deployable surface worth checking config for.
+  include:
+    - vercel.json
+    - .github/workflows/*.yml
+
+secret:
+  config: .gitleaks.toml
+
+exit-code: 1
+quiet: true

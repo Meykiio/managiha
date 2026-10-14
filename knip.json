@@ -1,0 +1,32 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "scripts/*.{mjs,js}",
+    "e2e/**/*.spec.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.{mjs,js}",
+    "e2e/**/*.ts"
+  ],
+  "ignore": [
+    "dist/**",
+    "supabase/**",
+    "src/i18n/locales/**",
+    "src/test/**"
+  ],
+  "ignoreDependencies": [
+    "k6"
+  ],
+  "ignoreBinaries": [
+    "semgrep",
+    "k6"
+  ],
+  "rules": {
+    "exports": "off",
+    "types": "off",
+    "nsExports": "off",
+    "nsTypes": "off"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "Managiha — Gestion de stock & carnet",
+  "short_name": "Managiha",
+  "description": "Gérez le stock et le carnet de crédit de votre épicerie simplement.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#1570EF",
+  "lang": "fr",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

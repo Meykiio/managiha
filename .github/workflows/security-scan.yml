@@ -1,0 +1,75 @@
+name: Security scan (scheduled)
+
+# Dynamic analysis and load testing against a deployed target.
+#
+# These are deliberately NOT on every pull request. ZAP's baseline scan needs a
+# reachable URL and takes minutes; k6's spike profile is meaningless against a
+# local preview. Neither belongs in the path of a normal commit, and putting them
+# there is how a security job ends up being skipped routinely.
+#
+# They are also the two jobs that need a real deployment, so they run weekly and
+# on demand rather than pretending a PR has one.
+
+on:
+  schedule:
+    # Mondays at 03:00 Africa/Algiers.
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL to scan and load test"
+        required: true
+        default: "https://managiha.vercel.app"
+
+jobs:
+  zap-baseline:
+    name: ZAP baseline (DAST)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'https://managiha.vercel.app' }}
+          # Non-blocking at first. The baseline reports informational and
+          # low-severity findings by default, and tuning which of those actually
+          # matter requires one real run against the live target — guessing the
+          # rule list in advance would either suppress something real or leave the
+          # job permanently red.
+          #
+          # Flip this to fail_action: true once .zap/rules.tsv has been tuned from
+          # an actual report.
+          fail_action: false
+          allow_issue_writing: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: zap-report
+          path: report_html.html
+          retention-days: 14
+
+  load:
+    name: k6 load test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run load test
+        run: k6 run scripts/load-test.js
+        env:
+          BASE_URL: ${{ github.event.inputs.target_url || 'https://managiha.vercel.app' }}

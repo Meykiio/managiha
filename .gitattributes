@@ -1,0 +1,26 @@
+# Normalise line endings in the repository, and never rewrite binary files.
+#
+# Without this, a Windows checkout with core.autocrlf=true rewrites every file on
+# commit and the diff for a one-line change shows the whole file. The source is
+# stored with LF; the working tree gets whatever the platform wants.
+* text=auto eol=lf
+
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+
+package-lock.json  -diff  linguist-generated
+
+*.md   text eol=lf
+*.sql  text eol=lf

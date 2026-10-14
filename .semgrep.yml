@@ -1,0 +1,83 @@
+# Semgrep configuration.
+#
+# Two halves, and the second is the interesting one.
+#
+# Registry rulesets cover the generic classes (XSS, injection, secrets). The
+# custom rules below encode invariants that only this project has, and that a
+# reviewer would otherwise have to remember on every diff. A rule that lives in a
+# document and not in a runner is a rule that decays.
+
+rules:
+  # ── Architecture invariants ───────────────────────────────────────────────
+
+  - id: no-client-write-to-computed-columns
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      current_stock and carnet_customers.balance are owned by adjust_stock(),
+      checkout_sale() and record_carnet_transaction(). The database guard triggers
+      reject a direct write anyway, so this would fail at runtime: the RPC is the
+      only correct path, and stock or balance must never be computed in the browser.
+    patterns:
+      # Match the call, then inspect the argument text. An object-literal pattern
+      # like `update({..., current_stock: $V, ...})` does not parse in semgrep,
+      # and it failed silently — the rule was skipped while the scan reported
+      # success, which is worse than no rule at all.
+      - pattern: $SB.from($TABLE).update($OBJ)
+      - metavariable-regex:
+          metavariable: $OBJ
+          regex: '(?s).*\b(current_stock|balance)\s*:.*'
+
+  - id: no-dangerously-set-inner-html
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      dangerouslySetInnerHTML is an XSS surface. The shipping Content-Security-Policy
+      forbids inline script, so injected markup would be blocked anyway — but the
+      right fix is to render through React, not to rely on the policy catching it.
+    patterns:
+      - pattern-either:
+          - pattern: <$EL dangerouslySetInnerHTML={...} />
+          - pattern: $EL.dangerouslySetInnerHTML = ...
+
+  - id: no-eval-or-function-constructor
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      eval and the Function constructor cannot run under the shipping CSP
+      (no 'unsafe-eval') and are the classic injection primitive.
+    patterns:
+      - pattern-either:
+          - pattern: eval(...)
+          - pattern: new Function(...)
+          - pattern: window.eval(...)
+
+  - id: no-hardcoded-supabase-service-key
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      A service_role key bypasses RLS entirely and must never reach the client
+      bundle. Only the publishable/anon key belongs in the browser.
+    pattern-regex: 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'
+
+  # ── i18n invariants ───────────────────────────────────────────────────────
+
+  - id: no-translated-label-on-data-structure
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >
+      A data structure in src/lib/ must carry a TranslationKey, not a resolved
+      string. Resolving with t() at module scope freezes the language at import and
+      does not look wrong; src/lib/constants.ts shows the correct shape.
+    paths:
+      include:
+        - "**/src/lib/**"
+    patterns:
+      # Same shape as the rule above: match the declaration, inspect the text.
+      - pattern-either:
+          - pattern: const $X = $OBJ
+          - pattern: |
+              const $X = $OBJ;
+      - metavariable-regex:
+          metavariable: $OBJ
+          regex: '(?s).*\b(label|title|name)\s*:\s*t\(.*'

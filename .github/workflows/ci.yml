@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Gate (lint, types, unit, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # One command, the same one a developer runs locally. If these ever diverge,
+      # "it passes locally" stops meaning anything.
+      - name: Gate
+        run: npm run gate
+
+      - name: Dead code and unused dependencies
+        run: npm run knip
+
+  e2e:
+    name: E2E and accessibility (axe, both themes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Builds, then serves on 127.0.0.1 and runs axe against every public route
+      # in both themes and in RTL.
+      - name: Accessibility suite
+        run: npm run gate:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  security:
+    name: Secrets, static analysis, dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: gitleaks scans commits, not just the working tree, so a
+          # shallow clone would miss a secret that was later removed.
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          # Registry rulesets for the generic classes, plus .semgrep.yml for the
+          # invariants only this project has: no client write to current_stock or
+          # balance, no dangerouslySetInnerHTML, no eval, no service_role key in the
+          # bundle, no translated label baked onto a data structure in src/lib.
+          config: >-
+            .semgrep.yml
+            p/owasp-top-ten
+            p/typescript
+            p/react
+
+      - name: Trivy (vulnerabilities, secrets, misconfig)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          trivy-config: trivy.yaml
+          exit-code: "1"
+          severity: HIGH,CRITICAL
+
+      # Fails on high and critical only. This project has no runtime deps beyond
+      # React, Supabase and lucide, so anything high is worth stopping for.
+      - name: Dependency audit
+        run: npm audit --audit-level=high

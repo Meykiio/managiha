@@ -1,0 +1,243 @@
+import { useEffect, useState } from "react";
+import { TriangleAlert } from "lucide-react";
+import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
+import { CategoryCombo } from "./CategoryCombo";
+import { ProductImageUpload } from "./ProductImageUpload";
+import { fetchSuppliers } from "../../lib/api";
+import { UNITS } from "../../lib/constants";
+import { computeMargin } from "../../lib/margin";
+import { fmtMoneyShort } from "../../lib/format";
+import type { Supplier, Unit } from "../../lib/types";
+import { t } from "../../i18n";
+
+export interface ProductFormValues {
+  name: string;
+  categoryId: string | null;
+  unit: Unit;
+  costPrice: string;
+  sellPrice: string;
+  currentStock: string;
+  threshold: string;
+  barcode: string;
+  sku: string;
+  expiryDate: string;
+  supplierId: string;
+  imagePath: string | null;
+}
+
+export const emptyProductForm: ProductFormValues = {
+  name: "",
+  categoryId: null,
+  unit: "piece",
+  costPrice: "",
+  sellPrice: "",
+  currentStock: "",
+  threshold: "",
+  barcode: "",
+  sku: "",
+  expiryDate: "",
+  supplierId: "",
+  imagePath: null,
+};
+
+interface ProductFormFieldsProps {
+  storeId: string;
+  productId?: string;
+  values: ProductFormValues;
+  onChange: (values: ProductFormValues) => void;
+  errors: Partial<Record<keyof ProductFormValues, string>>;
+  isEdit?: boolean;
+}
+
+export function ProductFormFields({
+  storeId,
+  productId,
+  values,
+  onChange,
+  errors,
+  isEdit,
+}: ProductFormFieldsProps) {
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+
+  useEffect(() => {
+    fetchSuppliers(storeId)
+      .then(setSuppliers)
+      .catch(() => setSuppliers([]));
+  }, [storeId]);
+
+  const set = <K extends keyof ProductFormValues>(key: K, v: ProductFormValues[K]) =>
+    onChange({ ...values, [key]: v });
+
+  /**
+   * Feedback as the price is typed, not only on the product page afterwards.
+   * Selling below cost is a mistake you want to catch while you are still looking
+   * at the two numbers that caused it.
+   */
+  const liveMargin = computeMargin(
+    values.sellPrice === "" ? null : Number(values.sellPrice.replace(",", ".")),
+    values.costPrice === "" ? null : Number(values.costPrice.replace(",", "."))
+  );
+
+  return (
+    <div className="space-y-5">
+      {isEdit && productId && (
+        <div>
+          <span className="mb-1.5 block text-sm font-medium text-body-soft">
+            {t("productForm.image")}
+          </span>
+          <ProductImageUpload
+            storeId={storeId}
+            productId={productId}
+            imagePath={values.imagePath}
+            onImageChange={(path) => set("imagePath", path)}
+          />
+        </div>
+      )}
+      <Input
+        label={t("productForm.name")}
+        required
+        placeholder={t("productForm.namePlaceholder")}
+        value={values.name}
+        error={errors.name}
+        onChange={(e) => set("name", e.target.value)}
+      />
+      <CategoryCombo
+        storeId={storeId}
+        value={values.categoryId}
+        onChange={(id) => set("categoryId", id)}
+      />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Select
+          label={t("productForm.unit")}
+          value={values.unit}
+          onChange={(e) => set("unit", e.target.value as Unit)}
+        >
+          {UNITS.map((u) => (
+            <option key={u.value} value={u.value}>
+              {t(u.labelKey)}
+            </option>
+          ))}
+        </Select>
+        <Input
+          label={`${t("productForm.threshold")} (${t("common.optional")})`}
+          type="number"
+          inputMode="decimal"
+          step="any"
+          min="0"
+          value={values.threshold}
+          onChange={(e) => set("threshold", e.target.value)}
+        />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label={t("productForm.costPrice")}
+          type="number"
+          inputMode="decimal"
+          step="any"
+          min="0"
+          suffix="DZD"
+          value={values.costPrice}
+          error={errors.costPrice}
+          onChange={(e) => set("costPrice", e.target.value)}
+        />
+        <Input
+          label={t("productForm.sellPrice")}
+          type="number"
+          inputMode="decimal"
+          step="any"
+          min="0"
+          suffix="DZD"
+          value={values.sellPrice}
+          error={errors.sellPrice}
+          onChange={(e) => set("sellPrice", e.target.value)}
+        />
+      </div>
+      {liveMargin.belowCost && (
+        <p className="flex items-center gap-2 text-xs font-medium text-error-fg" role="alert">
+          <TriangleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {t("productForm.belowCostWarning", { cost: fmtMoneyShort(Number(values.costPrice)) })}
+        </p>
+      )}
+      {!liveMargin.belowCost && liveMargin.percent != null && (
+        <p className="text-xs text-body-muted">
+          {t("productForm.marginHint", {
+            amount: fmtMoneyShort(liveMargin.absolute ?? 0),
+            percent: liveMargin.percent.toFixed(0),
+          })}
+        </p>
+      )}
+      {!isEdit && (
+        <Input
+          label={`${t("productForm.currentStock")} (${t("common.optional")})`}
+          type="number"
+          inputMode="decimal"
+          step="any"
+          min="0"
+          value={values.currentStock}
+          hint={
+            isEdit ? undefined : t("inventory.form.initialStockHint")
+          }
+          onChange={(e) => set("currentStock", e.target.value)}
+        />
+      )}
+      {isEdit && (
+        <p className="rounded-lg bg-bg px-3.5 py-2.5 text-xs text-body-muted">
+          {t("productForm.currentStockEditHint")}
+        </p>
+      )}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label={`${t("productForm.barcode")} (${t("common.optional")})`}
+          placeholder={t("productForm.barcodePlaceholder")}
+          inputMode="numeric"
+          autoComplete="off"
+          value={values.barcode}
+          error={errors.barcode}
+          onChange={(e) => set("barcode", e.target.value)}
+        />
+        <Input
+          label={`${t("productForm.sku")} (${t("common.optional")})`}
+          autoComplete="off"
+          value={values.sku}
+          error={errors.sku}
+          onChange={(e) => set("sku", e.target.value)}
+        />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Input
+          label={`${t("productForm.expiry")} (${t("common.optional")})`}
+          type="date"
+          value={values.expiryDate}
+          onChange={(e) => set("expiryDate", e.target.value)}
+        />
+        <Select
+          label={`${t("productForm.supplier")} (${t("common.optional")})`}
+          value={values.supplierId}
+          onChange={(e) => set("supplierId", e.target.value)}
+        >
+          <option value="">—</option>
+          {suppliers.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+export function productFormErrors(
+  values: ProductFormValues
+): Partial<Record<keyof ProductFormValues, string>> {
+  const errors: Partial<Record<keyof ProductFormValues, string>> = {};
+  if (!values.name.trim()) errors.name = t("validate.nameRequired");
+  for (const key of ["costPrice", "sellPrice"] as const) {
+    const raw = values[key];
+    if (raw !== "" && (Number.isNaN(Number(raw)) || Number(raw) < 0)) {
+      errors[key] = t("validate.amountInvalid");
+    }
+  }
+  return errors;
+}

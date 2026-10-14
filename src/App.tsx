@@ -1,0 +1,199 @@
+import { useState, lazy, Suspense } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import { FullScreenSpinner } from "./components/ui/Spinner";
+import { AppLayout } from "./components/layout/AppLayout";
+import LoginPage from "./pages/auth/LoginPage";
+import SignupPage from "./pages/auth/SignupPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import { isSupabaseConfigured } from "./lib/supabaseClient";
+import { t } from "./i18n";
+import { LocaleProvider } from "./i18n/LocaleProvider";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ErrorBoundary } from "./components/ui/ErrorBoundary";
+
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const ProductsPage = lazy(() => import("./pages/products/ProductsPage"));
+const ProductDetailPage = lazy(() => import("./pages/products/ProductDetailPage"));
+const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
+const CarnetPage = lazy(() => import("./pages/carnet/CarnetPage"));
+const CustomerDetailPage = lazy(() => import("./pages/carnet/CustomerDetailPage"));
+const SuppliersPage = lazy(() => import("./pages/suppliers/SuppliersPage"));
+const ReportsPage = lazy(() => import("./pages/reports/ReportsPage"));
+const SettingsPage = lazy(() => import("./pages/settings/SettingsPage"));
+const ScannerPage = lazy(() => import("./pages/ScannerPage"));
+
+function ConfigErrorScreen() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-bg p-6 text-center">
+      <h1 className="text-lg font-semibold text-body">{t("configError.title")}</h1>
+      <p className="max-w-md text-sm leading-relaxed text-body-muted">
+        {t("configError.body")}
+      </p>
+    </div>
+  );
+}
+
+function StoreMissingScreen() {
+  const { refreshStore, signOut, userDataError } = useAuth();
+  const navigate = useNavigate();
+  const [retrying, setRetrying] = useState(false);
+
+  const retry = async () => {
+    setRetrying(true);
+    await refreshStore();
+    setRetrying(false);
+  };
+
+  const logout = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg p-6 text-center">
+      <h1 className="text-lg font-semibold text-body">{t("storeMissing.title")}</h1>
+      <p className="max-w-md text-sm leading-relaxed text-body-muted">{t("storeMissing.body")}</p>
+      {userDataError && (
+        <div className="max-w-md rounded-lg border border-error bg-error-tint p-3 text-start">
+          <p className="text-xs font-semibold uppercase tracking-wide text-error-fg">
+            {t("storeMissing.errorLabel")}
+          </p>
+          <p className="mt-1 break-words font-mono text-xs text-error-fg">{userDataError}</p>
+        </div>
+      )}
+      <p className="max-w-md text-xs text-body-muted">{t("storeMissing.hint")}</p>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={retry}
+          disabled={retrying}
+          className="h-11 rounded-lg bg-primary-solid px-4 text-sm font-medium text-onPrimary hover:opacity-90 disabled:opacity-60"
+        >
+          {t("common.retry")}
+        </button>
+        <button
+          type="button"
+          onClick={logout}
+          className="h-11 rounded-lg border border-line-hi bg-surface px-4 text-sm font-medium text-body-soft hover:bg-surface-mid"
+        >
+          {t("nav.logout")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { loading, session, storeMissing, userDataError, store } = useAuth();
+  if (loading) return <FullScreenSpinner />;
+  if (!session) return <Navigate to="/login" replace />;
+  if (storeMissing) {
+    return <StoreMissingScreen />;
+  }
+  if (userDataError && !store) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+        <div className="w-full max-w-md rounded-xl border border-line bg-surface p-6 text-center shadow-card">
+          <h2 className="text-lg font-semibold text-body">{t("common.error")}</h2>
+          <p className="mt-2 text-sm text-body-soft">{userDataError}</p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-4 rounded-lg bg-primary-solid px-4 py-2 text-sm font-medium text-onPrimary hover:opacity-90"
+          >
+            {t("common.retry")}
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
+function PublicOnly({ children }: { children: React.ReactNode }) {
+  const { loading, session } = useAuth();
+  if (loading) return <FullScreenSpinner />;
+  if (session) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<FullScreenSpinner />}>{children}</Suspense>;
+}
+
+export default function App() {
+  if (!isSupabaseConfigured) return <ConfigErrorScreen />;
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LocaleProvider>
+          <BrowserRouter>
+            <ToastProvider>
+              <AuthProvider>
+                  <Routes>
+                <Route
+                  path="/login"
+                  element={
+                    <PublicOnly>
+                      <LoginPage />
+                    </PublicOnly>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <PublicOnly>
+                      <SignupPage />
+                    </PublicOnly>
+                  }
+                />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <PublicOnly>
+                      <ForgotPasswordPage />
+                    </PublicOnly>
+                  }
+                />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route
+                  element={
+                    <RequireAuth>
+                      <AppLayout />
+                    </RequireAuth>
+                  }
+                >
+                  <Route path="/" element={<LazyPage><DashboardPage /></LazyPage>} />
+                  <Route path="/products" element={<LazyPage><ProductsPage /></LazyPage>} />
+                  <Route path="/products/:productId" element={<LazyPage><ProductDetailPage /></LazyPage>} />
+                  <Route path="/inventory" element={<LazyPage><InventoryPage /></LazyPage>} />
+                  <Route path="/carnet" element={<LazyPage><CarnetPage /></LazyPage>} />
+                  <Route path="/carnet/:customerId" element={<LazyPage><CustomerDetailPage /></LazyPage>} />
+                  <Route path="/suppliers" element={<LazyPage><SuppliersPage /></LazyPage>} />
+                  <Route path="/reports" element={<LazyPage><ReportsPage /></LazyPage>} />
+                  <Route path="/settings" element={<LazyPage><SettingsPage /></LazyPage>} />
+                </Route>
+                <Route
+                  path="/scanner"
+                  element={
+                    <RequireAuth>
+                      <LazyPage><ScannerPage /></LazyPage>
+                    </RequireAuth>
+                  }
+                />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+        </AuthProvider>
+      </ToastProvider>
+      </BrowserRouter>
+      </LocaleProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
+}

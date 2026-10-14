@@ -1,0 +1,31 @@
+# gitleaks configuration.
+#
+# The default ruleset is broad and correct; this only narrows it where the
+# repository legitimately contains things that look like secrets.
+
+title = "Managiha"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Repository-specific false positives"
+
+# Supabase publishable/anon keys and local .env templates. The publishable key is
+# designed to be shipped to browsers and is protected by RLS, not by secrecy — but
+# the service_role key is not, and that one is NOT allowlisted. If a service_role
+# key ever appears, this scan must fail.
+paths = [
+  '''\.env\.example$''',
+  '''supabase/all-in-one\.sql$''',
+  '''supabase/master-schema\.sql$''',
+]
+
+# Test fixtures use obvious throwaway values ('x' as a password, fixed UUIDs,
+# placeholder hosts). None of them authenticate against anything real.
+regexes = [
+  '''sb_publishable_placeholder''',
+  '''placeholder\.supabase\.co''',
+  '''managiha\.test''',
+  '''encrypted_password.*'x''''',
+]
