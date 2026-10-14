@@ -286,12 +286,10 @@ Sign up once with that address in the app, then run the file in the SQL Editor. 
 is safe to re-run — it wipes only that account's own rows first.
 
 A hosted instance runs at **<https://managiha.vercel.app/>**. Its demo login is
-`demo@managiha.app` / `Managiha2026` **once that deployment's Supabase project has
-been seeded** — run `seed-demo.sql` in the SQL Editor of whichever project the
-deployment's environment variables point at. If the credentials are rejected,
-that is the reason, not a bug.
+`demo@managiha.app` / `Managiha2026` and it works — the deployment points at the
+project where that store is seeded.
 
-> Any published demo credentials are public by definition. Treat that account as a
+> Published demo credentials are public by definition. Treat that account as a
 > sandbox and never put real shop data in it.
 
 ## Deploying

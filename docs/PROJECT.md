@@ -427,26 +427,17 @@ remains is the part that code cannot do.
 
 **Needs a human, and cannot be automated:**
 
-1. **Point the hosted deployment at the right Supabase project.** The site at
-   `managiha.vercel.app` is built against a project that is not the one this
-   repository was verified against. Two consequences: the demo credentials
-   documented in the README do **not** work there, and it is unknown whether that
-   project has migrations 00018–00024. Set `VITE_SUPABASE_URL` and
-   `VITE_SUPABASE_PUBLISHABLE_KEY` in the hosting project settings and redeploy —
-   they are baked in at build time, so changing them needs a rebuild, not a
-   restart. Then run `supabase/seed-demo.sql` against whichever project it points
-   at.
-2. **Set the production redirect URLs in Supabase**, or password reset links point
+1. **Set the production redirect URLs in Supabase**, or password reset links point
    at `localhost`. Exact values and the reason the failure is silent are in
    [LAUNCH.md](LAUNCH.md#redirect-urls).
-3. **Native-speaker review of the Arabic.** Both the interface terminology and the
+2. **Native-speaker review of the Arabic.** Both the interface terminology and the
    entire Arabic privacy policy were written without one. Accurate as translations,
    unverified as legal instruments.
-4. **Loi 18-07 cross-border transfer position.** Requires confirming the Supabase
+3. **Loi 18-07 cross-border transfer position.** Requires confirming the Supabase
    hosting region against the ANPDP authorisation requirement. Not determinable
    from the code.
-5. **Legal review of the translated policies.** French is the reference text.
-6. **Manual phone pass.** Sign up, add a product, receive stock with a lot date,
+4. **Legal review of the translated policies.** French is the reference text.
+5. **Manual phone pass.** Sign up, add a product, receive stock with a lot date,
    count the shelf, record credit, take a sale, switch all three languages, then
    repeat in aeroplane mode. The E2E suite runs against a preview server and cannot
    meaningfully take the network away.

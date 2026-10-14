@@ -24,31 +24,35 @@ local `.env`. It previously did not — see the CI defect in `docs/PROJECT.md`.
 
 The Vercel project `managiha` exists and is linked (`meykiio's projects`).
 
-**Intended production environment variables:**
+**Production environment variables:**
 
 ```
 VITE_SUPABASE_URL               = https://oliiyrueztsmswtjlbhb.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY   = sb_publishable_...
 ```
 
-Both were previously pointing at a deleted Supabase project and were corrected.
+Both previously pointed at a deleted Supabase project and were corrected.
 
-### ⚠ The live deployment does not match this
+### Vercel deploys `main` on every push
 
-The bundle served at `managiha.vercel.app` references a **different** project —
-`cchmcvhafzewnfnnbojm` — not `oliiyrueztsmswtjlbhb`. So either the variables above
-were set but the site was never rebuilt, or they were set on a different project.
+Worth knowing before you push: the project is linked to Git, so **every push to
+`main` rebuilds production**. There is no separate "release" step, and the
+environment variables above are baked into the bundle at build time.
 
-Two consequences, both real:
+This was discovered the useful way. A check of the live bundle found it pointing at
+a *different* project (`cchmcvhafzewnfnnbojm`), which looked like a misconfiguration
+— the variables said one thing and the site did another. It was not: the deployed
+artifact was simply old, built before the variables were corrected. Pushing the
+current code replaced it, and the live bundle now references
+`oliiyrueztsmswtjlbhb`, matching the configuration.
 
-1. The demo credentials in the README (`demo@managiha.app`) **do not work there**,
-   because that account exists on `oliiyrueztsmswtjlbhb`.
-2. It is unknown whether `cchmcvhafzewnfnnbojm` has migrations 00018–00024. If it
-   does not, screens added since will fail at runtime rather than degrade.
+Verified after that deploy: `managiha.vercel.app/login` renders the real form with
+no console errors, and the demo credentials in the README now work, because the
+site finally points at the project where the demo store is seeded.
 
-Environment variables are baked in at build time, so setting them is not enough —
-a redeploy is required. Then run `supabase/seed-demo.sql` against whichever
-project it points at.
+The lesson is the general one: **check the deployed artifact, not the settings
+page.** A configuration that is right and a build that is stale look identical
+from the dashboard and completely different from the browser.
 
 Deploy:
 
