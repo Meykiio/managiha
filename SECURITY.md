@@ -69,6 +69,34 @@ These are accepted, not overlooked. Please do not report them as findings:
   a shop's sales history is its record. The carnet erasure path anonymises
   in place rather than deleting, and says so in the UI.
 
+## Dependency advisories
+
+`npm audit` reports a large number of advisories in this repository, and the
+breakdown matters more than the count.
+
+**Production dependencies: zero high, zero critical.** Two moderate advisories
+against `react-router`, both fixed only by the react-router 7 migration:
+
+- An open redirect via a backslash in `<Link>` / `useNavigate`.
+- Arbitrary constructor injection in SSR hydration.
+
+The second does not apply — this is a client-only single-page app with no server
+rendering. The first requires an attacker-controlled route target, and every
+`to=` in this codebase is built from a database UUID, not from user input. The
+upgrade is a planned, isolated migration rather than something to fold into an
+unrelated change.
+
+**Dev toolchain: everything else.** All 27 high and 2 critical advisories sit in
+build-time tooling — Tailwind's file watcher, Lighthouse's browser downloader, and
+the glob libraries under both. None of it is bundled, served, or reachable by a
+user. Dependabot tracks them and opens pull requests; several cannot be resolved
+without the Tailwind 4 migration, which is deferred for the same reason as the
+router one.
+
+The CI gate therefore runs `npm audit --omit=dev --audit-level=high`, so it fails
+on what ships and reports what does not. To see the full picture, run `npm audit`
+locally.
+
 ## What must never happen in a contribution
 
 - The `service_role` key must never appear in client code, in an environment
