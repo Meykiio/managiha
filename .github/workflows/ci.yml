@@ -95,13 +95,22 @@ jobs:
             p/react
 
       - name: Trivy (vulnerabilities, secrets, misconfig)
-        uses: aquasecurity/trivy-action@0.28.0
+        # Pinned to the version the action's own README documents, and the Trivy
+        # binary is pinned too so a scan result is reproducible rather than a
+        # function of whatever shipped that week.
+        #
+        # The tag MUST keep its `v` prefix. `aquasecurity/trivy-action@0.28.0`
+        # resolves to nothing, and a step that cannot resolve its action fails
+        # before it runs — which silently skipped the dependency audit below it
+        # and marked every CI run red.
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
           trivy-config: trivy.yaml
           exit-code: "1"
           severity: HIGH,CRITICAL
+          version: v0.76.0
 
       # Fails on high and critical only. This project has no runtime deps beyond
       # React, Supabase and lucide, so anything high is worth stopping for.

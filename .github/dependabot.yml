@@ -60,6 +60,12 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: vite
         update-types: ["version-update:semver-major"]
+      # ESLint 9 replaced .eslintrc with flat config. This repo uses .eslintrc.cjs,
+      # so a major bump cannot pass — the migration is a deliberate change, like
+      # the Tailwind and Vite ones above, not a bot pull request that turns main
+      # red and teaches everyone to ignore Dependabot.
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"

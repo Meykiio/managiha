@@ -1,42 +1,43 @@
-version: 2
-
 # Trivy configuration.
 #
-# Scans the filesystem and the lockfile. There is no container image to scan —
-# the deployable artefact is static files on Vercel — so `misconfig` is the
-# interesting scanner here: it reads vercel.json and the workflow files, which is
-# exactly where a security mistake would be invisible in review.
+# Every key below appears in Trivy's documented config schema:
+# https://trivy.dev/latest/docs/references/configuration/config-file/
+#
+# An earlier version of this file used keys that do not exist — a top-level
+# `version`, `severity` nested under `scan`, and a `misconfiguration.include`
+# list — and pointed the secret scanner at `.gitleaks.toml`, which is a different
+# format entirely (gitleaks TOML is not a trivy-secret.yaml). It also skipped
+# `package-lock.json`, which is the file Trivy reads to find npm vulnerabilities,
+# so the vulnerability scan could never have found anything.
+#
+# None of that had ever run, because the CI step failed while resolving the action
+# version before Trivy started. The config was wrong and invisible at the same
+# time, which is the worst combination.
+
+# Severity and exit-code are passed as action inputs in ci.yml, where they are
+# visible next to the step that uses them, so they are not repeated here.
+
 scan:
   scanners:
     - vuln
     - secret
     - misconfig
-  severity:
-    - HIGH
-    - CRITICAL
   skip-dirs:
     - node_modules
     - dist
     - coverage
-    - supabase
     - .git
+    # Schema, migrations and test fixtures. The SQL suites carry deliberately fake
+    # JWTs to exercise row-level security, and the generated bundle repeats the
+    # publishable key. Neither is a secret, and scanning them produces noise that
+    # buries a real finding.
+    - supabase
   skip-files:
+    # Documentation, which contains example keys on purpose.
     - "**/*.md"
-    - "supabase/all-in-one.sql"
-    - "supabase/master-schema.sql"
-    - "package-lock.json"
 
 vulnerability:
+  # Report only what has a fix available. An unfixed advisory is not something a
+  # contributor can act on, and a scanner that fails the build for it gets turned
+  # off.
   ignore-unfixed: true
-
-misconfiguration:
-  # The deployable surface worth checking config for.
-  include:
-    - vercel.json
-    - .github/workflows/*.yml
-
-secret:
-  config: .gitleaks.toml
-
-exit-code: 1
-quiet: true
